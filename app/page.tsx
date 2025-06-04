@@ -20,7 +20,7 @@ export default function MainPage() {
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user }, error } = await supabase.auth.getUser()
-      if (user && !error) {
+      if (user && !error && user.email) {
         setUserEmail(user.email)
       }
     }
@@ -45,7 +45,7 @@ export default function MainPage() {
         <div className="auth-buttons">
           {userEmail ? (
             <>
-              <span className="user-email">👤USUARIO:  {userEmail}</span>
+              <span className="user-email">👤USUARIO: {userEmail}</span>
               <button onClick={handleLogout} className="auth logout">
                 <FaRightFromBracket />
                 <span>Cerrar Sesión</span>
