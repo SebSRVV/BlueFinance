@@ -190,35 +190,57 @@ export default function DashboardPage() {
     reader.readAsArrayBuffer(file)
   }
 
-  const exportToExcel = () => {
-    const data = [
-      ['Fecha', 'Descripcion', 'Ingreso', 'Egreso', 'ahorro', 'deuda'],
-      ...transactions.map(tx => {
-        const isWarda = tx.description.toLowerCase().includes('warda')
-        return [
-          new Date(tx.created_at).toLocaleDateString(),
-          tx.description,
-          tx.type === 'income' ? tx.amount : '',
-          tx.type === 'expense' ? tx.amount : '',
-          isWarda ? '✔' : '',
-          ''
-        ]
-      }),
-      ...debts.map(d => [
-        new Date(d.created_at).toLocaleDateString(),
-        d.reason,
-        '',
-        d.amount,
-        '',
-        '✔'
-      ])
-    ]
+const exportToExcel = () => {
+  const headers = ['Fecha', 'Descripción', 'Ingreso', 'Egreso', 'Ahorro', 'Deuda', 'Neto']
+  const rows: any[] = []
 
-    const wb = XLSX.utils.book_new()
-    const ws = XLSX.utils.aoa_to_sheet(data)
-    XLSX.utils.book_append_sheet(wb, ws, 'Movimientos')
-    XLSX.writeFile(wb, 'Movimientos_Financieros.xlsx')
-  }
+  // Transacciones
+  transactions.forEach(tx => {
+    const isWarda = tx.description.toLowerCase().includes('warda')
+    const ingreso = tx.type === 'income' ? tx.amount : 0
+    const egreso = tx.type === 'expense' ? tx.amount : 0
+    const neto = ingreso - egreso
+
+    rows.push([
+      new Date(tx.created_at).toLocaleDateString(),
+      tx.description,
+      ingreso || '',
+      egreso || '',
+      isWarda ? '✔' : '',
+      '',
+      neto
+    ])
+  })
+
+  // Deudas
+  debts.forEach(d => {
+    rows.push([
+      new Date(d.created_at).toLocaleDateString(),
+      `${d.reason} - ${d.debtor_name}`,
+      '',
+      d.amount,
+      '',
+      '✔',
+      -d.amount
+    ])
+  })
+
+  // Totales
+  const totalIngreso = transactions.filter(tx => tx.type === 'income').reduce((sum, tx) => sum + tx.amount, 0)
+  const totalEgreso = transactions.filter(tx => tx.type === 'expense').reduce((sum, tx) => sum + tx.amount, 0)
+  const totalDeuda = debts.reduce((sum, d) => sum + d.amount, 0)
+  const totalNeto = totalIngreso - totalEgreso - totalDeuda
+
+  rows.push([])
+  rows.push(['Totales', '', totalIngreso, totalEgreso, '', totalDeuda, totalNeto])
+
+  // Crear Excel
+  const wb = XLSX.utils.book_new()
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows])
+  XLSX.utils.book_append_sheet(wb, ws, 'Movimientos')
+  XLSX.writeFile(wb, 'Movimientos_Financieros.xlsx')
+}
+
 
   const handleUpdateTransaction = async () => {
     const { error } = await supabase
