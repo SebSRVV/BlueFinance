@@ -1,5 +1,5 @@
 'use client'
-
+import { useRouter } from 'next/navigation'
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { v4 as uuidv4 } from 'uuid'
@@ -7,8 +7,15 @@ import {
   FaArrowDown,
   FaArrowUp,
   FaDollarSign,
-  FaExclamationTriangle
+  FaExclamationTriangle,
+  FaTimes,
+  FaCheck,
+  FaEdit,
+  FaTrash,
+  FaFileExcel,
+  FaFileImport,
 } from 'react-icons/fa'
+import { FaHouse } from 'react-icons/fa6'
 import * as XLSX from 'xlsx'
 import './Dashboard.css'
 
@@ -30,12 +37,15 @@ type Debt = {
   created_at: string
 }
 
+  
+
 export default function DashboardPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [debts, setDebts] = useState<Debt[]>([])
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [selectedItem, setSelectedItem] = useState<any>(null)
+  const router = useRouter()
 
   const [newEntry, setNewEntry] = useState({
     type: 'income',
@@ -216,7 +226,16 @@ export default function DashboardPage() {
     fetchAllData()
   }
 
-  return (
+return (
+  <>
+    <button
+      onClick={() => router.push('/')}
+      className="home-fab"
+      aria-label="Volver al inicio"
+    >
+      <FaHouse />
+    </button>
+
     <div className="dashboard">
       {message && <div className={`alert ${message.type}`}>{message.text}</div>}
 
@@ -263,7 +282,6 @@ export default function DashboardPage() {
         </form>
       </div>
 
-      {/* Nueva sección de importación */}
       <div className="import-section">
         <h2>📥 Importar Movimientos</h2>
         <input type="file" id="fileUpload" accept=".xlsx,.csv" onChange={handleFileUpload} hidden />
@@ -292,34 +310,53 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {selectedItem && (
-        <div className="popup">
-          <div className="popup-content">
-            <h3>{selectedItem.title}</h3>
-            <p><strong>Monto:</strong> S/{Math.abs(selectedItem.amount).toFixed(2)}</p>
-            <p><strong>Fecha:</strong> {selectedItem.date}</p>
-            {selectedItem.reason && <p><strong>Motivo:</strong> {selectedItem.reason}</p>}
-            {selectedItem.source === 'debt' && selectedItem.status === 'pending' && (
-              <button onClick={() => markAsPaid(selectedItem)}>✅ Marcar como pagada</button>
-            )}
-            <button onClick={() => alert('Función de edición aún no implementada')}>✏️ Editar</button>
-            <button onClick={async () => {
-              if (confirm('¿Estás seguro de eliminar este registro?')) {
-                if (selectedItem.source === 'transaction') {
-                  await supabase.from('wallet_transactions').delete().eq('id', selectedItem.id)
-                } else {
-                  await supabase.from('debts').delete().eq('id', selectedItem.id)
-                }
-                closePopup()
-                fetchAllData()
-              }
-            }}>🗑️ Eliminar</button>
-            <button onClick={closePopup}>❌ Cerrar</button>
-          </div>
-        </div>
+
+{selectedItem && (
+  <div className="popup">
+    <div className="popup-content">
+      <h3>{selectedItem.title}</h3>
+      <p><strong>Monto:</strong> S/{Math.abs(selectedItem.amount).toFixed(2)}</p>
+      <p><strong>Fecha:</strong> {selectedItem.date}</p>
+      {selectedItem.reason && <p><strong>Motivo:</strong> {selectedItem.reason}</p>}
+
+      {selectedItem.source === 'debt' && selectedItem.status === 'pending' && (
+        <button className="popup-btn success" onClick={() => markAsPaid(selectedItem)}>
+          <FaCheck /> Marcar como pagada
+        </button>
       )}
+
+      <button className="popup-btn edit" onClick={() => alert('Función de edición aún no implementada')}>
+        <FaEdit /> Editar
+      </button>
+
+      <button
+        className="popup-btn delete"
+        onClick={async () => {
+          if (confirm('¿Estás seguro de eliminar este registro?')) {
+            if (selectedItem.source === 'transaction') {
+              await supabase.from('wallet_transactions').delete().eq('id', selectedItem.id)
+            } else {
+              await supabase.from('debts').delete().eq('id', selectedItem.id)
+            }
+            closePopup()
+            fetchAllData()
+          }
+        }}
+      >
+        <FaTrash /> Eliminar
+      </button>
+
+      <button className="popup-btn close" onClick={closePopup}>
+        <FaTimes /> Cerrar
+      </button>
     </div>
-  )
+  </div>
+)}
+
+    </div>
+      </>
+)
+
 }
 
 function Card({ title, value, icon }: { title: string; value: number; icon: React.ReactNode }) {
