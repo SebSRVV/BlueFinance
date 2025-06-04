@@ -19,13 +19,19 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     })
 
     if (error) {
-      setError('Correo o contraseña incorrectos')
+      if (error.message.includes('Email not confirmed')) {
+        setError('Debes confirmar tu correo electrónico antes de iniciar sesión.')
+      } else {
+        setError('Correo o contraseña incorrectos')
+      }
+    } else if (!data.user) {
+      setError('Usuario no encontrado o sin confirmar')
     } else {
       router.push('/dashboard')
     }

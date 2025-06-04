@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import './AdminPanel.css'
+import { FaHouse, FaChartBar } from 'react-icons/fa6'
 
-const ADMIN_EMAIL = 'sebrojasw@gmail.com' // 👈 CAMBIA esto por tu correo
+const ADMIN_EMAIL = 'sebrojasw@gmail.com' // 👈 CAMBIA esto si es necesario
 
 export default function AdminPanel() {
   const router = useRouter()
@@ -25,7 +26,7 @@ export default function AdminPanel() {
       setUserEmail(email)
 
       if (!email || email !== ADMIN_EMAIL) {
-        router.push('/') // o mostrar mensaje de acceso denegado
+        router.push('/')
       }
 
       setLoading(false)
@@ -77,12 +78,21 @@ export default function AdminPanel() {
 
   return (
     <div className="admin-panel">
+      <div className="nav-buttons">
+        <button onClick={() => router.push('/')}>
+          <FaHouse /> Inicio
+        </button>
+        <button onClick={() => router.push('/dashboard')}>
+          <FaChartBar /> Dashboard
+        </button>
+      </div>
+
       <h1>🛠️ Panel de Administrador</h1>
       <p className="warning-text">Esta acción eliminará todos los datos financieros. Procede con cuidado.</p>
 
       {message && <div className={`alert ${message.type}`}>{message.text}</div>}
 
-      <button disabled={deleting} onClick={() => setShowPopup(true)}>
+      <button className="delete-all" disabled={deleting} onClick={() => setShowPopup(true)}>
         🗑️ Eliminar TODOS los registros
       </button>
 

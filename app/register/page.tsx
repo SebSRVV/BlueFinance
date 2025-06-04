@@ -12,18 +12,28 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setSuccess(null)
 
-    const { error } = await supabase.auth.signUp({ email, password })
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${location.origin}/dashboard`, // Cambia si tienes una página de confirmación
+      }
+    })
 
     if (error) {
       setError('Error al registrar: ' + error.message)
     } else {
-      router.push('/dashboard') // o a una pantalla de confirmación
+      setSuccess('Cuenta creada. Revisa tu correo para confirmar tu email.')
+      setEmail('')
+      setPassword('')
     }
 
     setLoading(false)
@@ -39,6 +49,7 @@ export default function RegisterPage() {
         <h2>📝 Crear cuenta</h2>
 
         {error && <div className="error-msg">{error}</div>}
+        {success && <div className="success-msg">{success}</div>}
 
         <label>
           Email:
