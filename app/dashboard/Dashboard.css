@@ -183,63 +183,95 @@ body {
   background-color: #059669;
 }
 
-/* === LISTA DE MOVIMIENTOS === */
-.movement-list {
+/* === MOVIMIENTOS RECIENTES === */
+.movements-title {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #E2E8F0;
+  margin: 2rem 0 1rem;
+}
+
+.movement-list-enhanced {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.movement-item {
-  background: #1E293B;
+.movement-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 1rem;
   padding: 1rem;
   border-radius: 10px;
   margin-bottom: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background-color: #1E293B;
+  color: #FFFFFF;
   box-shadow: 0 1px 5px rgba(0,0,0,0.15);
 }
 
-.movement-info {
+.card-left {
+  flex: 2;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
-.movement-info strong {
-  color: #F1F5F9;
-}
-
-.movement-info span {
-  font-size: 0.9rem;
-  color: #94A3B8;
-}
-
-.movement-amount {
+.card-description {
   font-weight: bold;
-  font-size: 1.2rem;
-  color: #E2E8F0;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.muted {
-  text-align: center;
+.card-date {
+  font-size: 0.85rem;
   color: #94A3B8;
+  margin-top: 0.25rem;
+}
+
+.card-center {
+  flex: 1;
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #E2E8F0;
+  text-align: center;
+}
+
+.card-right {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-end;
+}
+
+.card-button {
+  font-size: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  background-color: #3B82F6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.card-button:hover {
+  background-color: #2563EB;
 }
 
 /* === VARIANTES POR TIPO === */
-.type-ingreso {
+.type-income {
   background-color: #166534;
   color: #D1FAE5;
 }
 
-.type-gasto {
+.type-expense {
   background-color: #7F1D1D;
   color: #FECACA;
-}
-
-.type-ahorro {
-  background-color: #1E3A8A;
-  color: #BFDBFE;
 }
 
 .type-warda {
@@ -247,7 +279,12 @@ body {
   color: #FDE68A;
 }
 
-/* === VARIANTES SEMÁNTICAS === */
+.type-gasto {
+  background-color: #991B1B;
+  color: #FFE4E6;
+}
+
+/* === SEMÁNTICA === */
 .success { color: #22C55E; }
 .danger  { color: #EF4444; }
 .primary { color: #3B82F6; }
@@ -335,67 +372,3 @@ body {
 .popup-btn.close   { background-color: #475569; color: white; }
 
 .popup-btn:hover { opacity: 0.9; }
-
-
-.movement-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.movement-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  border-radius: 5px;
-  margin-bottom: 1rem;
-  background-color: #1E293B;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.15);
-}
-
-.movement-info {
-  flex: 1;
-}
-
-.movement-info strong {
-  display: block;
-  color: #F1F5F9;
-  font-size: 1rem;
-  margin-bottom: 0.25rem;
-}
-
-.movement-info span {
-  font-size: 0.85rem;
-  color: #94A3B8;
-}
-
-.movement-amount {
-  font-weight: bold;
-  font-size: 1.2rem;
-  min-width: 100px;
-  text-align: right;
-  color: #E2E8F0;
-}
-
-/* Colores por tipo */
-.type-income {
-  background-color: #166534;
-  color: #D1FAE5;
-}
-
-.type-expense {
-  background-color: #7F1D1D;
-  color: #FECACA;
-}
-
-.type-warda {
-  background-color: #78350F;
-  color: #FDE68A;
-}
-
-.type-gasto {
-  background-color: #991B1B;
-  color: #FFE4E6;
-}

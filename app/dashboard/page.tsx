@@ -327,41 +327,41 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <h2 style={{ color: '#E2E8F0', marginBottom: '1rem' }}>🧾 Movimientos recientes</h2>
+       <h2 className="movements-title">🧾 Movimientos recientes</h2>
 
-<ul className="movement-list">
+<ul className="movement-list-enhanced">
   {transactions.map(tx => {
     const isWarda = tx.description.toLowerCase().includes('warda')
     const tipo = isWarda ? 'warda' : tx.type
     const signo = tx.type === 'income' ? '+' : '-'
     return (
-      <li key={tx.id} className={`movement-item type-${tipo}`}>
-        <div className="movement-info">
-          <strong>{tx.description}</strong>
-          <span>{new Date(tx.created_at).toLocaleDateString()}</span>
+      <li key={tx.id} className={`movement-card type-${tipo}`}>
+        <div className="card-left">
+          <div className="card-description">{tx.description}</div>
+          <div className="card-date">{new Date(tx.created_at).toLocaleDateString()}</div>
         </div>
-        <div className="movement-amount">
-          {signo}S/{tx.amount.toFixed(2)}
+        <div className="card-center">
+          <div className="card-amount">{signo}S/{tx.amount.toFixed(2)}</div>
         </div>
-        <button className="popup-btn edit" onClick={() => openPopup(tx, 'transaction')}>
-          Detalles
-        </button>
+        <div className="card-right">
+          <button className="card-button" onClick={() => openPopup(tx, 'transaction')}>Detalles</button>
+        </div>
       </li>
     )
   })}
 
   {debts.map(d => (
-    <li key={d.id} className={`movement-item type-${d.status === 'pending' ? 'gasto' : 'income'}`}>
-      <div className="movement-info">
-        <strong>{d.reason} - {d.debtor_name}</strong>
-        <span>{new Date(d.created_at).toLocaleDateString()}</span>
+    <li key={d.id} className={`movement-card type-${d.status === 'pending' ? 'gasto' : 'income'}`}>
+      <div className="card-left">
+        <div className="card-description">{d.reason} - {d.debtor_name}</div>
+        <div className="card-date">{new Date(d.created_at).toLocaleDateString()}</div>
       </div>
-      <div className="movement-amount">
-        -S/{d.amount.toFixed(2)}
+      <div className="card-center">
+        <div className="card-amount">-S/{d.amount.toFixed(2)}</div>
       </div>
-      <button className="popup-btn edit" onClick={() => openPopup(d, 'debt')}>
-        Detalles
-      </button>
+      <div className="card-right">
+        <button className="card-button" onClick={() => openPopup(d, 'debt')}>Detalles</button>
+      </div>
     </li>
   ))}
 </ul>
