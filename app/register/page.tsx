@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import './RegisterPage.css'
+import { FaHouse } from 'react-icons/fa6'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -17,16 +18,12 @@ export default function RegisterPage() {
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password
-    })
+    const { error } = await supabase.auth.signUp({ email, password })
 
     if (error) {
-      console.error(error)
       setError('Error al registrar: ' + error.message)
     } else {
-      router.push('/dashboard') // o muestra mensaje de confirmación si usas verificación por correo
+      router.push('/dashboard') // o a una pantalla de confirmación
     }
 
     setLoading(false)
@@ -34,12 +31,17 @@ export default function RegisterPage() {
 
   return (
     <div className="register-page">
+      <button className="home-button" onClick={() => router.push('/')}>
+        <FaHouse />
+      </button>
+
       <form className="register-box" onSubmit={handleRegister}>
         <h2>📝 Crear cuenta</h2>
 
         {error && <div className="error-msg">{error}</div>}
 
-        <label>Email:
+        <label>
+          Email:
           <input
             type="email"
             placeholder="tucorreo@ejemplo.com"
@@ -49,7 +51,8 @@ export default function RegisterPage() {
           />
         </label>
 
-        <label>Contraseña:
+        <label>
+          Contraseña:
           <input
             type="password"
             placeholder="••••••••"

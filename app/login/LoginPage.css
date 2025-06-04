@@ -1,69 +1,94 @@
 .login-page {
-  min-height: 100vh;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  background: #121212;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0d1b2a, #1b263b);
+  padding: 2rem;
+  position: relative;
+}
+
+.home-button {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  background-color: #1e3a5f;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  padding: 0.75rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.home-button:hover {
+  background-color: #0d1b2a;
 }
 
 .login-box {
-  background: #1e1e1e;
-  padding: 2rem;
-  border-radius: 8px;
-  color: white;
+  background-color: #2b2f3a;
+  padding: 2.5rem 3rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  color: white;
 }
 
 .login-box h2 {
-  margin-bottom: 1rem;
   text-align: center;
-}
-
-.login-box label {
-  display: block;
   margin-bottom: 1rem;
-  font-weight: bold;
+  font-size: 1.8rem;
+  color: #e0e0e0;
 }
 
-.login-box input {
-  width: 100%;
-  padding: 0.6rem;
-  margin-top: 0.3rem;
-  border-radius: 5px;
-  border: none;
-  background: #2a2a2a;
+label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  color: #ddd;
+}
+
+input {
+  padding: 0.7rem;
+  margin-top: 0.4rem;
+  border-radius: 8px;
+  border: 1px solid #555;
+  background-color: #1f1f1f;
   color: white;
+  font-size: 1rem;
 }
 
-.login-box button {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #007bff;
+input::placeholder {
+  color: #aaa;
+}
+
+button[type="submit"] {
+  background-color: #007acc;
+  color: white;
+  padding: 0.9rem;
+  font-size: 1rem;
   border: none;
-  border-radius: 5px;
-  font-weight: bold;
+  border-radius: 8px;
   cursor: pointer;
-  margin-top: 1rem;
-  color: white;
-  transition: background-color 0.3s ease;
+  transition: background 0.3s ease;
+  font-weight: bold;
 }
 
-.login-box button:hover {
-  background-color: #0056b3;
-}
-
-.login-box button:disabled {
-  background-color: #444;
-  cursor: not-allowed;
+button[type="submit"]:hover {
+  background-color: #005fa3;
 }
 
 .error-msg {
-  background-color: #b71c1c;
-  color: #ffcdd2;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  border-radius: 5px;
+  background-color: #ff4444;
+  color: white;
+  padding: 0.7rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
   text-align: center;
 }

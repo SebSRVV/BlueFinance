@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import './LoginPage.css'
+import { FaHouse } from 'react-icons/fa6'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -24,7 +25,6 @@ export default function LoginPage() {
     })
 
     if (error) {
-      console.error(error)
       setError('Correo o contraseña incorrectos')
     } else {
       router.push('/dashboard')
@@ -35,12 +35,17 @@ export default function LoginPage() {
 
   return (
     <div className="login-page">
+      <button className="home-button" onClick={() => router.push('/')}>
+        <FaHouse />
+      </button>
+
       <form className="login-box" onSubmit={handleLogin}>
         <h2>🔐 Iniciar sesión</h2>
 
         {error && <div className="error-msg">{error}</div>}
 
-        <label>Email:
+        <label>
+          Email:
           <input
             type="email"
             placeholder="tu@email.com"
@@ -50,7 +55,8 @@ export default function LoginPage() {
           />
         </label>
 
-        <label>Contraseña:
+        <label>
+          Contraseña:
           <input
             type="password"
             placeholder="••••••••"
