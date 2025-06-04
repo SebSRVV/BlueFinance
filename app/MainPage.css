@@ -167,3 +167,21 @@ button.admin:hover {
     gap: 1rem;
   }
 }
+
+.auth.logout {
+  background-color: #ff4d4f;
+  color: white;
+}
+
+.auth-buttons {
+  display: flex;
+  align-items: center;
+}
+.user-email {
+  margin-right: 1rem;
+  font-weight: bold;
+  color: white;
+  display: flex;
+  align-items: center; /* centra verticalmente */
+  height: 100%; /* asegura que tome el alto del contenedor */
+}

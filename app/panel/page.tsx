@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase'
 import './AdminPanel.css'
 import { FaHouse, FaChartBar } from 'react-icons/fa6'
 
-const ADMIN_EMAIL = 'sebrojasw@gmail.com' // 👈 CAMBIA esto si es necesario
+const ADMIN_EMAIL = 'sebrojasw@gmail.com'
 
 export default function AdminPanel() {
   const router = useRouter()
@@ -26,7 +26,7 @@ export default function AdminPanel() {
       setUserEmail(email)
 
       if (!email || email !== ADMIN_EMAIL) {
-        router.push('/')
+        router.push('/error')
       }
 
       setLoading(false)

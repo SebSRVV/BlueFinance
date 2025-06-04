@@ -48,6 +48,7 @@ export default function DashboardPage() {
   const [selectedType, setSelectedType] = useState<'transaction' | 'debt' | null>(null)
   const [editDescription, setEditDescription] = useState('')
   const [editAmount, setEditAmount] = useState('')
+  const [userEmail, setUserEmail] = useState<string | null>(null)
 
   const openPopup = (item: any, type: 'transaction' | 'debt') => {
     setSelectedItem(item)
@@ -55,6 +56,32 @@ export default function DashboardPage() {
     setEditDescription(item.description || item.reason)
     setEditAmount(item.amount.toString())
   }
+
+const ADMIN_EMAIL = 'sebrojasw@gmail.com'
+
+useEffect(() => {
+  const getSession = async () => {
+    const {
+      data: { session }
+    } = await supabase.auth.getSession()
+
+    const user = session?.user
+    const email = user?.email || null
+    const emailVerified = !!user?.email_confirmed_at // <-- Verificación de correo
+
+    setUserEmail(email)
+
+    if (!email || email !== ADMIN_EMAIL || !emailVerified) {
+      router.push('/error')
+    }
+
+    setLoading(false)
+  }
+
+  getSession()
+}, [router])
+
+
 
   const closePopup = () => {
     setSelectedItem(null)
