@@ -66,38 +66,69 @@ body {
 /* === TARJETAS === */
 .card {
   background-color: #1E293B;
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   border-radius: 12px;
   display: flex;
   align-items: center;
   gap: 1rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  min-height: 100px;
+  flex: 1;
+  transition: transform 0.2s ease;
 }
 
-.card h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #CBD5E1;
+.card:hover {
+  transform: translateY(-2px);
 }
 
-.card p {
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: #FFFFFF;
-}
-
-/* === ÍCONOS === */
+/* === CONTENEDOR DEL ÍCONO === */
+/* === CONTENEDOR CIRCULAR DEL ÍCONO === */
 .icon-box {
-  background-color: #0F172A;
-  padding: 0.75rem;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: rgba(255, 255, 255, 0.05); /* Sutil fondo oscuro */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
+/* === ÍCONOS POR TIPO === */
 .icon {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
+}
+
+.icon.success {
+  color: #22C55E;
+}
+
+.icon.danger {
+  color: #EF4444;
+}
+
+.icon.warning {
+  color: #FACC15;
+}
+
+.icon.primary {
+  color: #3B82F6;
+}
+
+/* === TEXTO DE LAS TARJETAS === */
+.card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #CBD5E1;
+}
+
+.card p {
+  margin: 0.25rem 0 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #FFFFFF;
 }
 
 /* === FORMULARIO === */
@@ -145,32 +176,60 @@ body {
   background: #60A5FA;
 }
 
-/* === IMPORTACIÓN / EXPORTACIÓN === */
+/* === SECCIÓN IMPORTAR / EXPORTAR === */
 .import-section {
   background-color: #1E293B;
   padding: 1.5rem;
   border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  margin-top: 2rem;
   text-align: center;
+}
+
+.import-section h2 {
+  color: #E2E8F0;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* === BOTONES UNIFICADOS === */
+.base-button,
+.import-button,
+.export-button,
+.report-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  min-height: 48px;
+  text-align: center;
+  white-space: nowrap;
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
-.import-button,
-.export-button {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  margin: 0.5rem;
-  font-weight: bold;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  color: white;
-  transition: background-color 0.3s ease;
+.base-button i {
+  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* === COLORES DE BOTONES === */
 .import-button {
   background-color: #0EA5E9;
 }
-
 .import-button:hover {
   background-color: #0284C7;
 }
@@ -178,9 +237,23 @@ body {
 .export-button {
   background-color: #10B981;
 }
-
 .export-button:hover {
   background-color: #059669;
+}
+
+.report-button {
+  background-color: #f39c12;
+}
+.report-button:hover {
+  background-color: #e67e22;
+}
+
+.import-button-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 /* === MOVIMIENTOS RECIENTES === */
@@ -234,8 +307,8 @@ body {
 .card-center {
   flex: 1;
   display: flex;
-  align-items: center;     /* Centrado vertical */
-  justify-content: center; /* Centrado horizontal */
+  align-items: center;
+  justify-content: center;
   font-size: 1.2rem;
   font-weight: bold;
   color: #E2E8F0;
@@ -263,7 +336,7 @@ body {
   background-color: #2563EB;
 }
 
-/* === VARIANTES POR TIPO === */
+/* === ESTILOS POR TIPO === */
 .type-income {
   background-color: #166534;
   color: #D1FAE5;
@@ -347,6 +420,17 @@ body {
 .popup-content p {
   font-size: 1rem;
   margin: 0.5rem 0;
+}
+
+.popup-content input {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.6rem;
+  background: #334155;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  margin-bottom: 1rem;
 }
 
 /* === BOTONES POPUP === */

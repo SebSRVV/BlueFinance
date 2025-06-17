@@ -365,16 +365,22 @@ const exportToExcel = () => {
           </form>
         </div>
 
-        <div className="import-section">
-          <h2>📂 Importar / Exportar</h2>
-          <input type="file" id="fileUpload" accept=".xlsx" onChange={handleImport} hidden />
-          <label htmlFor="fileUpload" className="import-button">
-            <FaFileImport /> Importar desde Excel
-          </label>
-          <button onClick={exportToExcel} className="export-button">
-            <FaFileExport /> Exportar a Excel
-          </button>
-        </div>
+      <div className="import-section">
+  <h2>📂 Importar / Exportar</h2>
+  <div className="import-button-wrapper">
+    <input type="file" id="fileUpload" accept=".xlsx" onChange={handleImport} hidden />
+    <label htmlFor="fileUpload" className="import-button">
+      <FaFileImport /> Importar desde Excel
+    </label>
+    <button onClick={exportToExcel} className="export-button">
+      <FaFileExport /> Exportar a Excel
+    </button>
+    <button onClick={() => router.push('/deudas')} className="report-button">
+      <FaExclamation /> Generar reporte de deudas
+    </button>
+  </div>
+</div>
+
 
        <h2 className="movements-title">🧾 Movimientos recientes</h2>
 
