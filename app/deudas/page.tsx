@@ -24,6 +24,14 @@ export default function ReporteDeudasPage() {
   const reporteRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // Aplicar estilo solo en esta página
+    document.body.classList.add('deudas-activa')
+    return () => {
+      document.body.classList.remove('deudas-activa')
+    }
+  }, [])
+
+  useEffect(() => {
     const fetchDeudas = async () => {
       setLoading(true)
       const { data: sessionData } = await supabase.auth.getUser()
@@ -74,7 +82,7 @@ export default function ReporteDeudasPage() {
   const formatearFecha = (fecha: string) => dayjs(fecha).format('DD/MM/YYYY')
 
   return (
-    <main className="dashboard">
+    <main className="deudas-page">
       <button className="return-button" onClick={() => router.push('/dashboard')}>
         ⬅ Volver al Dashboard
       </button>
