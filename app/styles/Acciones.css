@@ -1,0 +1,55 @@
+.acciones-container {
+  background-color: #1e293b;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-top: 2rem;
+  color: #f1f5f9;
+  text-align: center;
+}
+
+.acciones-botones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease;
+  color: white;
+}
+
+.btn.import {
+  background-color: #3b82f6;
+}
+
+.btn.import:hover {
+  background-color: #2563eb;
+}
+
+.btn.export {
+  background-color: #10b981;
+}
+
+.btn.export:hover {
+  background-color: #059669;
+}
+
+.btn.reporte {
+  background-color: #f59e0b;
+  color: black;
+}
+
+.btn.reporte:hover {
+  background-color: #d97706;
+}

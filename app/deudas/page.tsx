@@ -3,21 +3,22 @@
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import html2canvas from 'html2canvas'
+import dayjs from 'dayjs'
 import { supabase } from '@/lib/supabase'
 import './deudas.css'
 
-type Debt = {
+type Deuda = {
   id: string
-  debtor_name: string
-  amount: number
+  person: string
   reason: string
+  total_amount: number
   status: 'pending' | 'paid'
   created_at: string
 }
 
 export default function ReporteDeudasPage() {
   const router = useRouter()
-  const [deudas, setDeudas] = useState<Debt[]>([])
+  const [deudas, setDeudas] = useState<Deuda[]>([])
   const [filtro, setFiltro] = useState('')
   const [loading, setLoading] = useState(true)
   const reporteRef = useRef<HTMLDivElement>(null)
@@ -25,11 +26,18 @@ export default function ReporteDeudasPage() {
   useEffect(() => {
     const fetchDeudas = async () => {
       setLoading(true)
-      const { data } = await supabase
+      const { data: sessionData } = await supabase.auth.getUser()
+      const user_id = sessionData?.user?.id
+
+      const { data, error } = await supabase
         .from('debts')
         .select('*')
-        .eq('status', 'pending')
+        .eq('user_id', user_id)
         .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error al obtener deudas:', error.message)
+      }
 
       setDeudas(data || [])
       setLoading(false)
@@ -40,20 +48,18 @@ export default function ReporteDeudasPage() {
 
   const deudasFiltradas = filtro
     ? deudas.filter(d =>
-        d.debtor_name.toLowerCase().includes(filtro.toLowerCase())
+        d.person?.toLowerCase().includes(filtro.toLowerCase()) ||
+        d.reason?.toLowerCase().includes(filtro.toLowerCase())
       )
     : deudas
 
-  const agrupadas = deudasFiltradas.reduce<Record<string, Debt[]>>(
-    (acc, deuda) => {
-      if (!acc[deuda.debtor_name]) acc[deuda.debtor_name] = []
-      acc[deuda.debtor_name].push(deuda)
-      return acc
-    },
-    {}
-  )
+  const agrupadas = deudasFiltradas.reduce<Record<string, Deuda[]>>((acc, deuda) => {
+    if (!acc[deuda.person]) acc[deuda.person] = []
+    acc[deuda.person].push(deuda)
+    return acc
+  }, {})
 
-  const total = deudasFiltradas.reduce((sum, d) => sum + d.amount, 0)
+  const total = deudasFiltradas.reduce((sum, d) => sum + d.total_amount, 0)
 
   const descargarImagen = async () => {
     if (reporteRef.current) {
@@ -65,6 +71,8 @@ export default function ReporteDeudasPage() {
     }
   }
 
+  const formatearFecha = (fecha: string) => dayjs(fecha).format('DD/MM/YYYY')
+
   return (
     <main className="dashboard">
       <button className="return-button" onClick={() => router.push('/dashboard')}>
@@ -74,12 +82,12 @@ export default function ReporteDeudasPage() {
       <h1 className="dashboard-title">🧾 Reporte de Deudas</h1>
 
       <div className="form-card">
-        <label>Filtrar por persona:</label>
+        <label>Filtrar por persona o motivo:</label>
         <input
           type="text"
           value={filtro}
           onChange={(e) => setFiltro(e.target.value)}
-          placeholder="Ej: Juan"
+          placeholder="Ej: Juan, comida"
         />
       </div>
 
@@ -89,27 +97,22 @@ export default function ReporteDeudasPage() {
         ) : Object.keys(agrupadas).length === 0 ? (
           <p>No hay deudas pendientes.</p>
         ) : (
-          Object.entries(agrupadas).map(([persona, items]) => (
-            <div key={persona} className="reporte-persona">
+          Object.entries(agrupadas).map(([persona, deudas]) => (
+            <div key={persona} className="grupo-deuda">
               <h3>{persona}</h3>
               <ul>
-                {items.map((d) => (
+                {deudas.map(d => (
                   <li key={d.id}>
-                    <span>
-                      <strong>{d.reason}</strong>
-                    </span>
-                    <span>
-                      — S/{d.amount.toFixed(2)}{' '}
-                      <span className="fecha">
-                        ({new Date(d.created_at).toLocaleDateString()})
-                      </span>
-                    </span>
+                    <strong>{d.reason || 'Sin motivo'}</strong> —{' '}
+                    <span>Monto: S/{d.total_amount.toFixed(2)}</span> —{' '}
+                    <span>Estado: {d.status === 'pending' ? 'Pendiente' : 'Pagada'}</span> —{' '}
+                    <span className="fecha">Fecha: {formatearFecha(d.created_at)}</span>
                   </li>
                 ))}
               </ul>
               <p className="subtotal">
-                Total: S/
-                {items.reduce((sum, d) => sum + d.amount, 0).toFixed(2)}
+                Subtotal: S/
+                {deudas.reduce((sum, d) => sum + d.total_amount, 0).toFixed(2)}
               </p>
             </div>
           ))

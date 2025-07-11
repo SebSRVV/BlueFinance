@@ -1,0 +1,338 @@
+/* CONTENEDOR GENERAL */
+.historial-notificaciones {
+  margin-top: 2rem;
+  background-color: #1e293b;
+  padding: 2rem;
+  border-radius: 12px;
+  color: #f1f5f9;
+}
+
+.historial-notificaciones h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+/* TARJETAS */
+.tx-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #334155;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  gap: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s ease-in-out;
+}
+
+.tx-card:hover {
+  background-color: #3b475b;
+}
+
+/* IZQUIERDA */
+.tx-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.tx-icon {
+  padding: 1rem;
+  border-radius: 10px;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+}
+
+.tx-type {
+  font-weight: 800;
+  font-size: 1.2rem;
+}
+
+.tx-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.tx-desc {
+  font-size: 1.5rem;
+  color: #cbd5e1;
+  font-style: normal;
+}
+
+/* CENTRO: CUENTAS Y MONTO */
+.tx-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.4rem;
+  padding: 0 1rem;
+  border-left: 1px solid #475569;
+  border-right: 1px solid #475569;
+}
+
+/* ÍCONOS DE CUENTAS */
+.account-icon {
+  width: 30px; /* antes 30px */
+  height: 30px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.4rem; /* antes 1rem */
+  background-color: #1e293b;
+}
+
+/* Colores distintivos por cuenta */
+.account-icon.bcp {
+  color: #3b82f6; /* azul */
+}
+
+.account-icon.lemon {
+  color: #fbbf24; /* amarillo limón */
+}
+
+.account-icon.interbank {
+  color: #10b981; /* verde esmeralda */
+}
+
+.account-icon.ahorro {
+  color: #6366f1; /* violeta */
+}
+
+.account-icon.dinero {
+  color: #f97316; /* naranja */
+}
+
+.account-name {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+/* FLECHA ENTRE CUENTAS */
+.account-transfer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.account-transfer .arrow {
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+/* MONTO */
+.tx-amount {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.tx-amount.ingreso,
+.tx-amount.prestamo {
+  color: #22c55e;
+}
+
+.tx-amount.gasto,
+.tx-amount.deuda,
+.tx-amount.movimiento,
+.tx-amount.negativo {
+  color: #ef4444;
+}
+
+/* DERECHA */
+.tx-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+}
+
+.tx-date {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.tx-badge {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.7rem;
+}
+
+.tx-badge.ok {
+  background-color: #16a34a33;
+  color: #22c55e;
+}
+
+.tx-badge.no {
+  background-color: #f8717133;
+  color: #ef4444;
+}
+
+.tx-edit {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.tx-edit:hover {
+  color: #60a5fa;
+}
+
+/* COLORES DE TIPO */
+.tx-type.ingreso,
+.tx-icon.ingreso {
+  color: #22c55e;
+}
+
+.tx-type.gasto,
+.tx-icon.gasto {
+  color: #ef4444;
+}
+
+.tx-type.deuda,
+.tx-icon.deuda {
+  color: #facc15;
+}
+
+.tx-type.prestamo,
+.tx-icon.prestamo {
+  color: #fbbf24;
+}
+
+.tx-type.movimiento,
+.tx-icon.movimiento {
+  color: #8b5cf6;
+}
+
+/* Agrupa íconos horizontales con flecha */
+.account-transfer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.2rem;
+}
+
+/* Flecha entre íconos */
+.account-transfer .arrow {
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+/* Íconos de cuenta */
+.account-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1rem;
+  background-color: #1e293b;
+}
+
+/* Colores específicos */
+.account-icon.bcp {
+  color: #3b82f6; /* azul */
+}
+
+.account-icon.lemon {
+  color: #fbbf24; /* amarillo limón */
+}
+
+.account-icon.interbank {
+  color: #10b981; /* verde */
+}
+
+.account-icon.ahorro {
+  color: #6366f1; /* violeta */
+}
+
+.account-icon.dinero {
+  color: #f97316; /* naranja */
+}
+
+.tx-date-centered {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+/* SLIDE SWITCH */
+.tx-switch {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 18px;
+}
+
+.tx-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #6b7280;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+.tx-switch input:checked + .slider {
+  background-color: #22c55e;
+}
+
+.tx-switch input:checked + .slider:before {
+  transform: translateX(16px);
+}
+
+/* Sección superior del centro (para fecha) */
+.tx-center-top {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  margin-bottom: 0.3rem;
+}
+
+/* Fecha visible al inicio */
+.tx-date-centered {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  background-color: #1e293b;
+  padding: 2px 8px;
+  border-radius: 6px;
+}

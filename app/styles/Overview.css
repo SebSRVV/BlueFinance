@@ -1,0 +1,210 @@
+/* === CONTENEDOR GRID GENERAL === */
+.overview-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem 1rem;
+  width: 100%;
+}
+
+/* === TARJETA GENERAL === */
+.overview-card {
+  background-color: #1e293b;
+  padding: 1rem 1.25rem;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 100px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  transition: transform 0.25s ease, background-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.overview-card:hover {
+  transform: translateY(-4px);
+  background-color: #253249;
+}
+
+/* === ICONO CIRCULAR === */
+.card-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+/* === TEXTO DE LA TARJETA === */
+.card-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+}
+
+.card-title {
+  font-size: 1rem;
+  color: #cbd5e1;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.card-value {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+/* === COLORES POR TIPO === */
+.icon.income { color: #22C55E; }
+.icon.expense { color: #EF4444; }
+.icon.debt { color: #FACC15; }
+.icon.warda { color: #3B82F6; }
+.icon.account { color: #38BDF8; }
+.icon.interbank { color: #10B981; }
+.icon.bcp { color: #1e3a8a; }
+.icon.lemon { color: #eab308; }
+.icon.cash { color: #f1f5f9; }
+
+/* === WARDA CARD ESTILO ESPECIAL === */
+.warda-wide {
+  grid-column: span 4;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Header horizontal en WARDA CARD */
+.warda-wide-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+/* === LISTA WARDA A LA DERECHA === */
+.warda-list {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 0.75rem;
+  padding-bottom: 0.25rem;
+}
+
+.warda-list::-webkit-scrollbar {
+  height: 6px;
+}
+.warda-list::-webkit-scrollbar-thumb {
+  background-color: rgba(96, 165, 250, 0.5);
+  border-radius: 4px;
+}
+
+/* === ITEM WARDA === */
+.warda-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  min-width: 190px;
+  background: #1E293B;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.05);
+  transition: background-color 0.2s ease;
+}
+
+.warda-item:hover {
+  background-color: #27374d;
+}
+
+.warda-icon {
+  color: #3B82F6;
+  font-size: 1.1rem;
+  background-color: rgba(59, 130, 246, 0.15);
+  border-radius: 50%;
+  padding: 0.3rem;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.warda-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+  padding-left: 0.5rem;
+}
+
+.warda-name {
+  color: #E2E8F0;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.warda-amount {
+  color: #60A5FA;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* === TARJETA AHORRO WARDA EN LÍNEA === */
+.warda-horizontal {
+  grid-column: span 4;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 2rem;
+  padding: 1.25rem 1.5rem;
+}
+
+/* Parte izquierda (icono y texto) */
+.warda-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Lista a la derecha */
+.warda-inline-list {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.75rem;
+  overflow-x: auto;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.warda-wide {
+  grid-column: span 4;
+  display: flex;
+  flex-direction: row;
+  align-items: center;           /* Centra verticalmente */
+  justify-content: center;       /* Centra horizontalmente */
+  gap: 2rem;
+  flex-wrap: wrap;               /* Permite que los wardaditos se bajen si no entran */
+  padding: 1rem;
+}
+.warda-inline-list::-webkit-scrollbar {
+  height: 6px;
+}
+.warda-inline-list::-webkit-scrollbar-thumb {
+  background-color: rgba(96, 165, 250, 0.5);
+  border-radius: 4px;
+}
