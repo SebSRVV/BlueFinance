@@ -13,7 +13,7 @@ import '@/app/styles/Overview.css'
 import '@/app/styles/Historial.css'
 import './Dashboard.css'
 
-import { FaHouse } from 'react-icons/fa6'
+import { FaHouse, FaRotateRight } from 'react-icons/fa6'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -44,9 +44,15 @@ export default function DashboardPage() {
 
   return (
     <>
-      <button className="home-fab" onClick={() => router.push('/')}>
-        <FaHouse />
-      </button>
+      <div className="dashboard-header">
+        <button className="home-fab" onClick={() => router.push('/')}>
+          <FaHouse />
+        </button>
+
+        <button className="refresh-fab" onClick={() => window.location.reload()}>
+          <FaRotateRight />
+        </button>
+      </div>
 
       <div className="dashboard">
         <h1 className="dashboard-title">📊 Dashboard Financiero</h1>
