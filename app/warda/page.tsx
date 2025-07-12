@@ -172,6 +172,46 @@ export default function WardaPage() {
     fetchBCP(userId)
   }
 
+  const retirarDeWarda = async () => {
+    if (!selectedWardId || monto <= 0) {
+      mostrarMensaje('Selecciona un wardadito y monto válido', 'error')
+      return
+    }
+
+    const warda = wards.find(w => w.id === selectedWardId)
+    if (!warda) {
+      mostrarMensaje('Warda no encontrada', 'error')
+      return
+    }
+
+    if (monto > warda.balance) {
+      mostrarMensaje('Saldo insuficiente en el wardadito', 'error')
+      return
+    }
+
+    await supabase.from('ward_transactions').insert({
+      user_id: userId,
+      ward_id: selectedWardId,
+      amount: monto,
+      type: 'retiro',
+      description: 'Retiro hacia BCP'
+    })
+
+    await supabase.from('transactions').insert({
+      user_id: userId,
+      type: 'movimiento',
+      amount: monto,
+      destination_account_id: bcpAccountId,
+      description: 'Retiro desde wardadito'
+    })
+
+    setMonto(0)
+    setSelectedWardId('')
+    mostrarMensaje('Retiro realizado ✅', 'success')
+    fetchWards(userId)
+    fetchBCP(userId)
+  }
+
   const editarNombreWarda = (id: string, current: string) => {
     setEditingId(id)
     setEditedName(current)
@@ -183,42 +223,39 @@ export default function WardaPage() {
     fetchWards(userId)
   }
 
-const eliminarWarda = async (id: string) => {
-  const confirmed = confirm('¿Eliminar este wardadito?')
-  if (!confirmed) return
+  const eliminarWarda = async (id: string) => {
+    const confirmed = confirm('¿Eliminar este wardadito?')
+    if (!confirmed) return
 
-  const ward = wards.find(w => w.id === id)
-  if (!ward) return
+    const ward = wards.find(w => w.id === id)
+    if (!ward) return
 
-  const saldo = ward.balance
+    const saldo = ward.balance
 
-  if (saldo > 0) {
-    // 1. Registrar el retiro en ward_transactions
-    await supabase.from('ward_transactions').insert({
-      user_id: userId,
-      ward_id: id,
-      amount: saldo,
-      type: 'retiro',
-      description: 'Reintegro a BCP por eliminación de warda'
-    })
+    if (saldo > 0) {
+      await supabase.from('ward_transactions').insert({
+        user_id: userId,
+        ward_id: id,
+        amount: saldo,
+        type: 'retiro',
+        description: 'Reintegro a BCP por eliminación de warda'
+      })
 
-    // 2. Registrar ingreso en cuenta BCP
-    await supabase.from('transactions').insert({
-      user_id: userId,
-      type: 'movimiento',
-      amount: saldo,
-      destination_account_id: bcpAccountId,
-      description: 'Reintegro de warda eliminada'
-    })
+      await supabase.from('transactions').insert({
+        user_id: userId,
+        type: 'movimiento',
+        amount: saldo,
+        destination_account_id: bcpAccountId,
+        description: 'Reintegro de warda eliminada'
+      })
+    }
+
+    await supabase.from('wards').delete().eq('id', id)
+
+    mostrarMensaje('Warda eliminado y saldo devuelto a BCP', 'success')
+    fetchWards(userId)
+    fetchBCP(userId)
   }
-
-  // 3. Eliminar el wardadito
-  await supabase.from('wards').delete().eq('id', id)
-
-  mostrarMensaje('Warda eliminado y saldo devuelto a BCP', 'success')
-  fetchWards(userId)
-  fetchBCP(userId)
-}
 
   const mostrarMensaje = (msg: string, tipo: 'success' | 'error') => {
     setMensaje(msg)
@@ -288,6 +325,7 @@ const eliminarWarda = async (id: string) => {
             </div>
           )}
 
+          <h3>➕ Transferir desde BCP</h3>
           <div className="transfer-form">
             <select value={selectedWardId} onChange={(e) => setSelectedWardId(e.target.value)}>
               <option value="">Selecciona un wardadito</option>
@@ -302,6 +340,23 @@ const eliminarWarda = async (id: string) => {
               onChange={(e) => setMonto(parseFloat(e.target.value))}
             />
             <button onClick={transferirAWarda}>Transferir</button>
+          </div>
+
+          <h3>➖ Retirar a BCP</h3>
+          <div className="retiro-form">
+            <select value={selectedWardId} onChange={(e) => setSelectedWardId(e.target.value)}>
+              <option value="">Selecciona un wardadito</option>
+              {wards.map((w) => (
+                <option key={w.id} value={w.id}>{w.name}</option>
+              ))}
+            </select>
+            <input
+              type="number"
+              placeholder="Monto a retirar a BCP"
+              value={monto}
+              onChange={(e) => setMonto(parseFloat(e.target.value))}
+            />
+            <button onClick={retirarDeWarda}>Retirar</button>
           </div>
         </div>
 
