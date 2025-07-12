@@ -49,13 +49,11 @@ export default function HistorialMovimientos() {
       const { data: accs } = await supabase.from('accounts').select('*')
       const { data: debs } = await supabase.from('debts').select('*')
 
-      // Ordenar por fecha de creación
       setTransacciones((trans || []).sort((a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       ))
 
       setCuentas(accs || [])
-
       setDeudas((debs || []).sort((a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       ))
@@ -108,6 +106,10 @@ export default function HistorialMovimientos() {
   }
 
   const abrirEdicion = (tx: Transaccion) => {
+    if (tx.type === 'movimiento') {
+      alert('⚠️ No se puede editar una transferencia entre cuentas.')
+      return
+    }
     setEditando(tx)
     setEditDesc(tx.description)
     setEditAmount(tx.amount.toString())
@@ -115,15 +117,31 @@ export default function HistorialMovimientos() {
 
   const guardarCambios = async () => {
     if (!editando) return
-    await supabase.from('transactions').update({
-      description: editDesc,
-      amount: parseFloat(editAmount)
-    }).eq('id', editando.id)
+
+    const nuevoMonto = parseFloat(editAmount)
+    if (isNaN(nuevoMonto) || nuevoMonto <= 0) {
+      alert('❌ Ingresa un monto válido')
+      return
+    }
+
+    const { error } = await supabase
+      .from('transactions')
+      .update({
+        description: editDesc,
+        amount: nuevoMonto
+      })
+      .eq('id', editando.id)
+
+    if (error) {
+      alert('❌ Error al actualizar la transacción')
+      return
+    }
 
     setTransacciones(prev =>
-      prev.map(tx => tx.id === editando.id
-        ? { ...tx, description: editDesc, amount: parseFloat(editAmount) }
-        : tx
+      prev.map(tx =>
+        tx.id === editando.id
+          ? { ...tx, description: editDesc, amount: nuevoMonto }
+          : tx
       )
     )
 
@@ -159,8 +177,8 @@ export default function HistorialMovimientos() {
       setDeudas(prev => prev.map(d => d.id === deuda.id ? { ...d, status: 'paid' } : d))
       setTransacciones(prev => [...prev, {
         id: crypto.randomUUID(),
-        user_id,
         type: 'ingreso',
+        user_id,
         amount: deuda.total_amount,
         description: `Pago de deuda de ${deuda.person}`,
         category: 'Reembolso',
@@ -168,7 +186,7 @@ export default function HistorialMovimientos() {
         destination_account_id: null,
         created_at: new Date().toISOString(),
         is_reconciled: false
-      }])
+      } as Transaccion])
     }
   }
 
@@ -176,7 +194,6 @@ export default function HistorialMovimientos() {
     <div className="historial-notificaciones">
       <h2>📄 Historial de Movimientos</h2>
 
-      {/* Transacciones */}
       {transacciones.map(tx => {
         const origen = obtenerCuenta(tx.account_id)
         const destino = obtenerCuenta(tx.destination_account_id)
@@ -254,9 +271,11 @@ export default function HistorialMovimientos() {
                 <span className="slider"></span>
               </label>
 
-              <button className="tx-edit" onClick={() => abrirEdicion(tx)}>
-                <FaPen />
-              </button>
+              {tx.type !== 'movimiento' && (
+                <button className="tx-edit" onClick={() => abrirEdicion(tx)}>
+                  <FaPen />
+                </button>
+              )}
 
               <button className="tx-edit" onClick={() => eliminarMovimiento(tx.id)}>
                 <FaTrash />
@@ -295,18 +314,27 @@ export default function HistorialMovimientos() {
         </div>
       ))}
 
-      {/* Popup de edición */}
+      {/* Modal de edición */}
       {editando && (
-        <div className="popup">
+        <div className="popup-overlay">
           <div className="popup-content">
-            <h3>Editar Movimiento</h3>
+            <h3>✏️ Editar Movimiento</h3>
             <label>Descripción:</label>
-            <input value={editDesc} onChange={e => setEditDesc(e.target.value)} />
+            <input
+              value={editDesc}
+              onChange={e => setEditDesc(e.target.value)}
+              placeholder="Descripción"
+            />
             <label>Monto:</label>
-            <input type="number" value={editAmount} onChange={e => setEditAmount(e.target.value)} />
+            <input
+              type="number"
+              value={editAmount}
+              onChange={e => setEditAmount(e.target.value)}
+              placeholder="Monto"
+            />
             <div className="popup-buttons">
-              <button onClick={guardarCambios}>Guardar</button>
-              <button onClick={() => setEditando(null)}>Cancelar</button>
+              <button className="guardar" onClick={guardarCambios}>💾 Guardar</button>
+              <button className="cancelar" onClick={() => setEditando(null)}>Cancelar</button>
             </div>
           </div>
         </div>
