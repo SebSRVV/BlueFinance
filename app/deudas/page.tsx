@@ -5,15 +5,24 @@ import { useRouter } from 'next/navigation'
 import html2canvas from 'html2canvas'
 import dayjs from 'dayjs'
 import { supabase } from '@/lib/supabase'
+import {
+  FaUser,
+  FaMoneyBillWave,
+  FaCalendarAlt,
+  FaCheckCircle,
+  FaHourglassHalf
+} from 'react-icons/fa'
 import './deudas.css'
 
 type Deuda = {
   id: string
-  person: string
   reason: string
   total_amount: number
   status: 'pending' | 'paid'
   created_at: string
+  people: {
+    name: string
+  } | null
 }
 
 export default function ReporteDeudasPage() {
@@ -24,11 +33,8 @@ export default function ReporteDeudasPage() {
   const reporteRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Aplicar estilo solo en esta página
     document.body.classList.add('deudas-activa')
-    return () => {
-      document.body.classList.remove('deudas-activa')
-    }
+    return () => document.body.classList.remove('deudas-activa')
   }, [])
 
   useEffect(() => {
@@ -36,15 +42,25 @@ export default function ReporteDeudasPage() {
       setLoading(true)
       const { data: sessionData } = await supabase.auth.getUser()
       const user_id = sessionData?.user?.id
+      if (!user_id) return
 
       const { data, error } = await supabase
         .from('debts')
-        .select('*')
-        .eq('user_id', user_id)
-        .order('created_at', { ascending: false })
+        .select(`
+          id,
+          reason,
+          total_amount,
+          status,
+          created_at,
+          people (
+            name
+          )
+        `) as unknown as { data: Deuda[] | null, error: any }
 
       if (error) {
         console.error('Error al obtener deudas:', error.message)
+        setLoading(false)
+        return
       }
 
       setDeudas(data || [])
@@ -54,16 +70,19 @@ export default function ReporteDeudasPage() {
     fetchDeudas()
   }, [])
 
+  const formatearFecha = (fecha: string) => dayjs(fecha).format('DD/MM/YYYY')
+
   const deudasFiltradas = filtro
     ? deudas.filter(d =>
-        d.person?.toLowerCase().includes(filtro.toLowerCase()) ||
+        d.people?.name?.toLowerCase().includes(filtro.toLowerCase()) ||
         d.reason?.toLowerCase().includes(filtro.toLowerCase())
       )
     : deudas
 
   const agrupadas = deudasFiltradas.reduce<Record<string, Deuda[]>>((acc, deuda) => {
-    if (!acc[deuda.person]) acc[deuda.person] = []
-    acc[deuda.person].push(deuda)
+    const nombre = deuda.people?.name || 'Desconocido'
+    if (!acc[nombre]) acc[nombre] = []
+    acc[nombre].push(deuda)
     return acc
   }, {})
 
@@ -78,8 +97,6 @@ export default function ReporteDeudasPage() {
       link.click()
     }
   }
-
-  const formatearFecha = (fecha: string) => dayjs(fecha).format('DD/MM/YYYY')
 
   return (
     <main className="deudas-page">
@@ -103,18 +120,36 @@ export default function ReporteDeudasPage() {
         {loading ? (
           <p>Cargando deudas...</p>
         ) : Object.keys(agrupadas).length === 0 ? (
-          <p>No hay deudas pendientes.</p>
+          <p>No hay deudas registradas.</p>
         ) : (
           Object.entries(agrupadas).map(([persona, deudas]) => (
             <div key={persona} className="grupo-deuda">
-              <h3>{persona}</h3>
+              <h3><FaUser style={{ marginRight: 6 }} /> {persona}</h3>
               <ul>
                 {deudas.map(d => (
                   <li key={d.id}>
-                    <strong>{d.reason || 'Sin motivo'}</strong> —{' '}
-                    <span>Monto: S/{d.total_amount.toFixed(2)}</span> —{' '}
-                    <span>Estado: {d.status === 'pending' ? 'Pendiente' : 'Pagada'}</span> —{' '}
-                    <span className="fecha">Fecha: {formatearFecha(d.created_at)}</span>
+                    <strong>{d.reason || 'Sin motivo'}</strong>
+                    <span>
+                      <FaMoneyBillWave />{' '}
+                      <b>S/{d.total_amount.toFixed(2)}</b>
+                      <span className={`badge ${d.status === 'pending' ? 'badge-pending' : 'badge-paid'}`}>
+                        {d.status === 'pending' ? (
+                          <>
+                            <FaHourglassHalf style={{ marginRight: 4 }} />
+                            Pendiente
+                          </>
+                        ) : (
+                          <>
+                            <FaCheckCircle style={{ marginRight: 4 }} />
+                            Pagada
+                          </>
+                        )}
+                      </span>
+                    </span>
+                    <span className="fecha">
+                      <FaCalendarAlt style={{ marginRight: 4 }} />
+                      {formatearFecha(d.created_at)}
+                    </span>
                   </li>
                 ))}
               </ul>
