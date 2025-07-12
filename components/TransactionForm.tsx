@@ -61,6 +61,7 @@ export default function TransactionForm() {
         if (value === 'ingreso') categoriaDefault = 'Deposito'
         if (value === 'deuda') categoriaDefault = 'Deuda'
         if (value === 'prestamo') categoriaDefault = 'Prestamo'
+
         return {
           ...prev,
           tipo: value as TipoTransaccion,
@@ -68,6 +69,7 @@ export default function TransactionForm() {
           person: '',
           conciliado: false,
           cuenta_destino_id: '',
+          cuenta_id: ''
         }
       }
 
@@ -80,20 +82,36 @@ export default function TransactionForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setMensaje(null)
 
-    const { tipo, monto, descripcion, person, categoria, cuenta_id, cuenta_destino_id, fecha, conciliado } = formulario
+    const {
+      tipo,
+      monto,
+      descripcion,
+      person,
+      categoria,
+      cuenta_id,
+      cuenta_destino_id,
+      fecha,
+      conciliado
+    } = formulario
+
     const parsedAmount = parseFloat(monto)
 
-    if (isNaN(parsedAmount) || parsedAmount <= 0) return setMensaje('❌ Monto inválido')
-    if (!descripcion.trim()) return setMensaje('❌ Descripción obligatoria')
+    if (isNaN(parsedAmount) || parsedAmount <= 0)
+      return setMensaje('❌ El monto debe ser mayor a 0')
+    if (!descripcion.trim())
+      return setMensaje('❌ La descripción es obligatoria')
 
     const { data: userData } = await supabase.auth.getUser()
     const user_id = userData?.user?.id
-    if (!user_id) return setMensaje('❌ Error obteniendo usuario')
+    if (!user_id) return setMensaje('❌ Usuario no autenticado')
 
+    // === TIPO DEUDA ===
     if (tipo === 'deuda') {
-      if (!person.trim()) return setMensaje('❌ Persona requerida')
-      if (!cuenta_id) return setMensaje('❌ Cuenta requerida')
+      if (!person.trim()) return setMensaje('❌ Debes ingresar el nombre de la persona')
+      if (!cuenta_id) return setMensaje('❌ Selecciona una cuenta')
+
       const { error } = await supabase.from('debts').insert({
         id: uuidv4(),
         user_id,
@@ -103,10 +121,14 @@ export default function TransactionForm() {
         status: 'pending',
         created_at: new Date(fecha).toISOString()
       })
-      if (error) return setMensaje(`❌ Error: ${error.message}`)
-      setMensaje('✅ Deuda registrada')
+
+      if (error) return setMensaje(`❌ Error al guardar deuda: ${error.message}`)
+      setMensaje('✅ Deuda registrada correctamente')
+
+    // === TIPO PRESTAMO ===
     } else if (tipo === 'prestamo') {
-      if (!cuenta_id) return setMensaje('❌ Cuenta requerida')
+      if (!cuenta_id) return setMensaje('❌ Selecciona una cuenta')
+
       const { error } = await supabase.from('debts').insert({
         id: uuidv4(),
         user_id,
@@ -116,15 +138,18 @@ export default function TransactionForm() {
         status: 'pending',
         created_at: new Date(fecha).toISOString()
       })
-      if (error) return setMensaje(`❌ Error: ${error.message}`)
-      setMensaje('✅ Préstamo registrado')
+
+      if (error) return setMensaje(`❌ Error al guardar préstamo: ${error.message}`)
+      setMensaje('✅ Préstamo registrado correctamente')
+
+    // === TIPO MOVIMIENTO / INGRESO / GASTO ===
     } else {
-      if (!cuenta_id) return setMensaje('❌ Cuenta requerida')
+      if (!cuenta_id) return setMensaje('❌ Selecciona la cuenta origen')
 
       if (tipo === 'movimiento') {
-        if (!cuenta_destino_id || cuenta_id === cuenta_destino_id) {
-          return setMensaje('❌ Cuenta destino inválida')
-        }
+        if (!cuenta_destino_id) return setMensaje('❌ Selecciona la cuenta destino')
+        if (cuenta_id === cuenta_destino_id)
+          return setMensaje('❌ Cuenta origen y destino no pueden ser iguales')
       }
 
       const nuevaTransaccion = {
@@ -141,10 +166,12 @@ export default function TransactionForm() {
       }
 
       const { error } = await supabase.from('transactions').insert(nuevaTransaccion)
-      if (error) return setMensaje(`❌ Error: ${error.message}`)
-      setMensaje('✅ Movimiento registrado')
+      if (error) return setMensaje(`❌ Error al guardar transacción: ${error.message}`)
+
+      setMensaje('✅ Movimiento registrado correctamente')
     }
 
+    // Resetear formulario
     setFormulario({
       tipo: 'ingreso',
       monto: '',
@@ -157,13 +184,14 @@ export default function TransactionForm() {
       conciliado: false
     })
 
-    // 👇 Refrescar la vista
+    // Refrescar datos
     window.location.reload()
   }
 
+  // Control de visibilidad por tipo
   const mostrarCategoria = formulario.tipo === 'gasto'
   const mostrarConciliado = ['ingreso', 'gasto'].includes(formulario.tipo)
-  const mostrarCuenta = ['ingreso', 'gasto', 'deuda', 'prestamo'].includes(formulario.tipo)
+  const mostrarCuenta = ['ingreso', 'gasto', 'deuda', 'prestamo', 'movimiento'].includes(formulario.tipo)
   const mostrarCuentaDestino = formulario.tipo === 'movimiento'
   const mostrarPersona = formulario.tipo === 'deuda'
 
@@ -211,7 +239,7 @@ export default function TransactionForm() {
 
       {mostrarCuenta && (
         <>
-          <label>Cuenta:</label>
+          <label>{formulario.tipo === 'movimiento' ? 'Cuenta origen:' : 'Cuenta:'}</label>
           <select name="cuenta_id" value={formulario.cuenta_id} onChange={handleChange}>
             <option value="">Selecciona cuenta</option>
             {cuentas.map(c => (

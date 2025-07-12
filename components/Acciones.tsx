@@ -14,6 +14,10 @@ export default function Acciones({ onImportComplete }: { onImportComplete?: () =
     const file = e.target.files?.[0]
     if (!file) return
 
+    const { data: session } = await supabase.auth.getSession()
+    const user_id = session?.session?.user.id
+    if (!user_id) return alert('❌ Usuario no autenticado')
+
     const reader = new FileReader()
     reader.onload = async (event) => {
       const data = new Uint8Array(event.target?.result as ArrayBuffer)
@@ -25,36 +29,40 @@ export default function Acciones({ onImportComplete }: { onImportComplete?: () =
 
       for (const row of rows as any[]) {
         const fecha = new Date(row['Fecha']).toISOString()
-        const descripcion = row['Descripcion']
+        const descripcion = row['Descripcion'] || 'Sin descripción'
         const ingreso = parseFloat(row['Ingreso']) || 0
         const egreso = parseFloat(row['Egreso']) || 0
 
         if (ingreso) {
-          await supabase.from('wallet_transactions').insert({
+          await supabase.from('transactions').insert({
             id: uuidv4(),
-            type: 'income',
+            user_id,
+            type: 'ingreso',
             amount: ingreso,
-            descripcion,
+            description: descripcion,
             category: 'Importado',
-            created_at: fecha
+            created_at: fecha,
+            date: fecha.slice(0, 10)
           })
           count++
         }
 
         if (egreso) {
-          await supabase.from('wallet_transactions').insert({
+          await supabase.from('transactions').insert({
             id: uuidv4(),
-            type: 'expense',
+            user_id,
+            type: 'gasto',
             amount: egreso,
-            descripcion,
+            description: descripcion,
             category: 'Importado',
-            created_at: fecha
+            created_at: fecha,
+            date: fecha.slice(0, 10)
           })
           count++
         }
       }
 
-      alert(`${count} registros importados`)
+      alert(`✅ ${count} movimientos importados`)
       onImportComplete?.()
     }
 
@@ -62,52 +70,76 @@ export default function Acciones({ onImportComplete }: { onImportComplete?: () =
   }
 
   const exportToExcel = async () => {
-    const { data: transactions } = await supabase.from('wallet_transactions').select('*')
-    const { data: debts } = await supabase.from('debts').select('*')
+    const { data: session } = await supabase.auth.getSession()
+    const user_id = session?.session?.user.id
+    if (!user_id) return alert('❌ Usuario no autenticado')
 
-    const headers = ['Fecha', 'Descripción', 'Ingreso', 'Egreso', 'Ahorro', 'Deuda', 'Neto']
+    const { data: transactions, error: txError } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('user_id', user_id)
+
+    const { data: debts, error: debtError } = await supabase
+      .from('debts')
+      .select('*, people (name)')
+      .eq('user_id', user_id)
+
+    if (txError || debtError) {
+      return alert('❌ Error al cargar los datos')
+    }
+
+    const headers = ['Fecha', 'Descripción', 'Ingreso', 'Egreso', 'Cuenta', 'Deuda', 'Neto']
     const rows: any[] = []
 
+    // Procesar transacciones
     transactions?.forEach(tx => {
-      const isWarda = tx.description.toLowerCase().includes('warda')
-      const ingreso = tx.type === 'income' ? tx.amount : 0
-      const egreso = tx.type === 'expense' ? tx.amount : 0
-      const neto = ingreso - egreso
-
+      const ingreso = tx.type === 'ingreso' ? tx.amount : ''
+      const egreso = tx.type === 'gasto' ? tx.amount : ''
+      const neto = (tx.type === 'ingreso' ? tx.amount : 0) - (tx.type === 'gasto' ? tx.amount : 0)
       rows.push([
         new Date(tx.created_at).toLocaleDateString(),
-        tx.description,
-        ingreso || '',
-        egreso || '',
-        isWarda ? '✔' : '',
+        tx.description || '',
+        ingreso,
+        egreso,
+        tx.category || '',
         '',
         neto
       ])
     })
 
+    // Procesar deudas
     debts?.forEach(d => {
+      const nombre = d.people?.name || d.person_id || 'Sin contacto'
+      const monto = d.total_amount || 0
       rows.push([
         new Date(d.created_at).toLocaleDateString(),
-        `${d.reason} - ${d.debtor_name}`,
+        `${d.reason || 'Deuda'} - ${nombre}`,
         '',
-        d.amount,
+        monto,
         '',
         '✔',
-        -d.amount
+        -monto
       ])
     })
 
-    const totalIngreso = transactions?.filter(tx => tx.type === 'income').reduce((sum, tx) => sum + tx.amount, 0) || 0
-    const totalEgreso = transactions?.filter(tx => tx.type === 'expense').reduce((sum, tx) => sum + tx.amount, 0) || 0
-    const totalDeuda = debts?.reduce((sum, d) => sum + d.amount, 0) || 0
+    // Totales
+    const totalIngreso = transactions?.filter(tx => tx.type === 'ingreso')
+      .reduce((sum, tx) => sum + tx.amount, 0) || 0
+
+    const totalEgreso = transactions?.filter(tx => tx.type === 'gasto')
+      .reduce((sum, tx) => sum + tx.amount, 0) || 0
+
+    const totalDeuda = debts?.reduce((sum, d) => sum + (d.total_amount || 0), 0) || 0
+
     const totalNeto = totalIngreso - totalEgreso - totalDeuda
 
     rows.push([])
     rows.push(['Totales', '', totalIngreso, totalEgreso, '', totalDeuda, totalNeto])
 
+    // Crear Excel
     const wb = XLSX.utils.book_new()
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows])
-    XLSX.utils.book_append_sheet(wb, ws, 'Movimientos')
+    XLSX.utils.book_append_sheet(wb, ws, 'Reporte')
     XLSX.writeFile(wb, 'Reporte_Movimientos.xlsx')
   }
 

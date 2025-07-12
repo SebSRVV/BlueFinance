@@ -18,7 +18,6 @@ type Transaccion = {
   account_id: string
   destination_account_id: string | null
   created_at: string
-  date: string
   is_reconciled: boolean
 }
 
@@ -49,11 +48,17 @@ export default function HistorialMovimientos() {
       const { data: trans } = await supabase.from('transactions').select('*')
       const { data: accs } = await supabase.from('accounts').select('*')
       const { data: debs } = await supabase.from('debts').select('*')
-      setTransacciones((trans || []).sort((a, b) => b.date.localeCompare(a.date)))
+
+      // Ordenar por fecha de creación
+      setTransacciones((trans || []).sort((a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      ))
+
       setCuentas(accs || [])
+
       setDeudas((debs || []).sort((a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      )
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      ))
     }
 
     fetchData()
@@ -84,8 +89,11 @@ export default function HistorialMovimientos() {
     return <FaUniversity />
   }
 
-  const capitalizar = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
-  const formatoMoneda = (valor: number) => `S/${Number(valor).toFixed(2)}`
+  const capitalizar = (str: string) =>
+    str.charAt(0).toUpperCase() + str.slice(1)
+
+  const formatoMoneda = (valor: number) =>
+    `S/${Number(valor).toFixed(2)}`
 
   const toggleConciliado = async (id: string, current: boolean) => {
     await supabase.from('transactions').update({ is_reconciled: !current }).eq('id', id)
@@ -141,7 +149,10 @@ export default function HistorialMovimientos() {
         amount: deuda.total_amount,
         description: `Pago de deuda de ${deuda.person}`,
         category: 'Reembolso',
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        account_id: '',
+        destination_account_id: null,
+        is_reconciled: false
       })
 
     if (!err1 && !err2) {
@@ -156,7 +167,6 @@ export default function HistorialMovimientos() {
         account_id: '',
         destination_account_id: null,
         created_at: new Date().toISOString(),
-        date: new Date().toISOString(),
         is_reconciled: false
       }])
     }
@@ -194,7 +204,7 @@ export default function HistorialMovimientos() {
 
             <div className="tx-center">
               <span className="tx-date-centered">
-                {new Date(tx.date).toLocaleDateString()}
+                {new Date(tx.created_at).toLocaleDateString()}
               </span>
 
               {esMovimiento && origen && destino ? (
