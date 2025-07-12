@@ -112,13 +112,44 @@ export default function TransactionForm() {
       if (!person.trim()) return setMensaje('❌ Debes ingresar el nombre de la persona')
       if (!cuenta_id) return setMensaje('❌ Selecciona una cuenta')
 
+      let person_id: string
+
+      // Buscar si el contacto ya existe
+      const { data: existingPerson, error: personError } = await supabase
+        .from('people')
+        .select('id')
+        .eq('name', person.trim())
+        .eq('user_id', user_id)
+        .maybeSingle()
+
+      if (personError) return setMensaje('❌ Error al buscar persona')
+
+      if (existingPerson) {
+        person_id = existingPerson.id
+      } else {
+        // Crear nuevo contacto si no existe
+        const { data: newPerson, error: insertError } = await supabase
+          .from('people')
+          .insert({
+            id: uuidv4(),
+            user_id,
+            name: person.trim()
+          })
+          .select('id')
+          .single()
+
+        if (insertError) return setMensaje('❌ No se pudo crear el contacto')
+        person_id = newPerson.id
+      }
+
       const { error } = await supabase.from('debts').insert({
         id: uuidv4(),
         user_id,
-        person,
+        person_id,
         reason: descripcion,
         total_amount: parsedAmount,
         status: 'pending',
+        account_id: cuenta_id,
         created_at: new Date(fecha).toISOString()
       })
 
@@ -132,17 +163,17 @@ export default function TransactionForm() {
       const { error } = await supabase.from('debts').insert({
         id: uuidv4(),
         user_id,
-        person: 'Yo',
         reason: descripcion,
         total_amount: parsedAmount,
         status: 'pending',
+        account_id: cuenta_id,
         created_at: new Date(fecha).toISOString()
       })
 
       if (error) return setMensaje(`❌ Error al guardar préstamo: ${error.message}`)
       setMensaje('✅ Préstamo registrado correctamente')
 
-    // === TIPO MOVIMIENTO / INGRESO / GASTO ===
+    // === OTROS TIPOS ===
     } else {
       if (!cuenta_id) return setMensaje('❌ Selecciona la cuenta origen')
 
@@ -184,7 +215,6 @@ export default function TransactionForm() {
       conciliado: false
     })
 
-    // Refrescar datos
     window.location.reload()
   }
 
