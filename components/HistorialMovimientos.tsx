@@ -32,6 +32,7 @@ type Deuda = {
   reason: string
   total_amount: number
   status: 'pending' | 'paid'
+  category: string | null
   created_at: string
 }
 
@@ -53,10 +54,11 @@ export default function HistorialMovimientos() {
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       ))
 
-      setCuentas(accs || [])
       setDeudas((debs || []).sort((a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       ))
+
+      setCuentas(accs || [])
     }
 
     fetchData()
@@ -192,153 +194,167 @@ export default function HistorialMovimientos() {
 
   return (
     <div className="historial-notificaciones">
-      <h2>📄 Historial de Movimientos</h2>
+    <h2>📄 Historial de Movimientos</h2>
 
-      {transacciones.map(tx => {
-        const origen = obtenerCuenta(tx.account_id)
-        const destino = obtenerCuenta(tx.destination_account_id)
-        const esMovimiento = tx.type === 'movimiento'
-        const esPositivo = ['ingreso', 'prestamo'].includes(tx.type)
-        const montoClass = esPositivo ? 'ingreso' : 'negativo'
-        const origenClass = origen?.name.toLowerCase().replace(/\s+/g, '') || ''
-        const destinoClass = destino?.name.toLowerCase().replace(/\s+/g, '') || ''
+    {[
+      ...transacciones.map(tx => ({ ...tx, _tipo: 'transaccion' })),
+      ...deudas.map(d => ({ ...d, _tipo: 'deuda' }))
+    ]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .map((item: any) => {
+        if (item._tipo === 'transaccion') {
+          const tx = item as Transaccion
+          const origen = obtenerCuenta(tx.account_id)
+          const destino = obtenerCuenta(tx.destination_account_id)
+          const esMovimiento = tx.type === 'movimiento'
+          const esPositivo = ['ingreso', 'prestamo'].includes(tx.type)
+          const montoClass = esPositivo ? 'ingreso' : 'negativo'
+          const origenClass = origen?.name.toLowerCase().replace(/\s+/g, '') || ''
+          const destinoClass = destino?.name.toLowerCase().replace(/\s+/g, '') || ''
 
-        return (
-          <div className={`tx-card ${tx.type}`} key={tx.id}>
-            <div className="tx-left">
-              <div className={`tx-icon ${tx.type}`}>
-                {iconoPorTipo(tx.type)}
+          return (
+            <div className={`tx-card ${tx.type}`} key={tx.id}>
+              <div className="tx-left">
+                <div className={`tx-icon ${tx.type}`}>
+                  {iconoPorTipo(tx.type)}
+                </div>
+                <div className="tx-info">
+                  <span className={`tx-type ${tx.type}`}>
+                    {capitalizar(tx.type)}
+                  </span>
+                  <span className="tx-desc">
+                    {tx.description} {tx.category && `| Categoría: ${tx.category}`}
+                  </span>
+                </div>
               </div>
-              <div className="tx-info">
-                <span className={`tx-type ${tx.type}`}>
-                  {capitalizar(tx.type)}
+
+              <div className="tx-center">
+                <span className="tx-date-centered">
+                  {new Date(tx.created_at).toLocaleDateString()}
                 </span>
-                <span className="tx-desc">
-                  {tx.description} {tx.category && `| Categoría: ${tx.category}`}
-                </span>
+
+                {esMovimiento && origen && destino ? (
+                  <>
+                    <div className="account-transfer">
+                      <div className={`account-icon ${origenClass}`}>
+                        {iconoPorCuenta(origen.name)}
+                      </div>
+                      <span className="arrow">→</span>
+                      <div className={`account-icon ${destinoClass}`}>
+                        {iconoPorCuenta(destino.name)}
+                      </div>
+                    </div>
+                    <div className="account-name">
+                      {origen.name.toUpperCase()} → {destino.name.toUpperCase()}
+                    </div>
+                    <div className={`tx-amount ${montoClass}`}>
+                      - {formatoMoneda(tx.amount)}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {origen && (
+                      <div className={`account-icon ${origenClass}`}>
+                        {iconoPorCuenta(origen.name)}
+                      </div>
+                    )}
+                    <div className="account-name">{origen?.name.toUpperCase()}</div>
+                    <div className={`tx-amount ${tx.type}`}>
+                      {esPositivo ? '+' : '-'} {formatoMoneda(tx.amount)}
+                    </div>
+                  </>
+                )}
               </div>
-            </div>
 
-            <div className="tx-center">
-              <span className="tx-date-centered">
-                {new Date(tx.created_at).toLocaleDateString()}
-              </span>
+              <div className="tx-right">
+                <span className={`tx-badge ${tx.is_reconciled ? 'ok' : 'no'}`}>
+                  {tx.is_reconciled ? 'Conciliado' : 'No conciliado'}
+                </span>
 
-              {esMovimiento && origen && destino ? (
-                <>
-                  <div className="account-transfer">
-                    <div className={`account-icon ${origenClass}`}>
-                      {iconoPorCuenta(origen.name)}
-                    </div>
-                    <span className="arrow">→</span>
-                    <div className={`account-icon ${destinoClass}`}>
-                      {iconoPorCuenta(destino.name)}
-                    </div>
-                  </div>
-                  <div className="account-name">
-                    {origen.name.toUpperCase()} → {destino.name.toUpperCase()}
-                  </div>
-                  <div className={`tx-amount ${montoClass}`}>
-                    - {formatoMoneda(tx.amount)}
-                  </div>
-                </>
-              ) : (
-                <>
-                  {origen && (
-                    <div className={`account-icon ${origenClass}`}>
-                      {iconoPorCuenta(origen.name)}
-                    </div>
-                  )}
-                  <div className="account-name">{origen?.name.toUpperCase()}</div>
-                  <div className={`tx-amount ${tx.type}`}>
-                    {esPositivo ? '+' : '-'} {formatoMoneda(tx.amount)}
-                  </div>
-                </>
-              )}
-            </div>
+                <label className="tx-switch">
+                  <input
+                    type="checkbox"
+                    checked={tx.is_reconciled}
+                    onChange={() => toggleConciliado(tx.id, tx.is_reconciled)}
+                  />
+                  <span className="slider"></span>
+                </label>
 
-            <div className="tx-right">
-              <span className={`tx-badge ${tx.is_reconciled ? 'ok' : 'no'}`}>
-                {tx.is_reconciled ? 'Conciliado' : 'No conciliado'}
-              </span>
+                {tx.type !== 'movimiento' && (
+                  <button className="tx-edit" onClick={() => abrirEdicion(tx)}>
+                    <FaPen />
+                  </button>
+                )}
 
-              <label className="tx-switch">
-                <input
-                  type="checkbox"
-                  checked={tx.is_reconciled}
-                  onChange={() => toggleConciliado(tx.id, tx.is_reconciled)}
-                />
-                <span className="slider"></span>
-              </label>
-
-              {tx.type !== 'movimiento' && (
-                <button className="tx-edit" onClick={() => abrirEdicion(tx)}>
-                  <FaPen />
+                <button className="tx-edit" onClick={() => eliminarMovimiento(tx.id)}>
+                  <FaTrash />
                 </button>
-              )}
-
-              <button className="tx-edit" onClick={() => eliminarMovimiento(tx.id)}>
-                <FaTrash />
-              </button>
+              </div>
             </div>
-          </div>
-        )
+          )
+        } else {
+          const deuda = item as Deuda
+
+          if (deuda.status === 'paid') return null // No mostrar pagadas
+
+          return (
+            <div className="tx-card deuda" key={deuda.id}>
+              <div className="tx-left">
+                <div className="tx-icon deuda">
+                  <FaExclamation />
+                </div>
+                <div className="tx-info">
+                  <span className="tx-type deuda">Deuda</span>
+                  <span className="tx-desc">
+                    {deuda.reason} — {deuda.person}
+                    {deuda.category && ` | Categoría: ${deuda.category}`}
+                  </span>
+                </div>
+              </div>
+
+              <div className="tx-center">
+                <span className="tx-date-centered">
+                  {new Date(deuda.created_at).toLocaleDateString()}
+                </span>
+                <div className="account-name">Pendiente</div>
+                <div className="tx-amount deuda">- {formatoMoneda(deuda.total_amount)}</div>
+              </div>
+
+              <div className="tx-right">
+                <button className="tx-edit" onClick={() => marcarDeudaComoPagada(deuda)}>
+                  <FaCheck /> Marcar como pagada
+                </button>
+              </div>
+            </div>
+          )
+        }
       })}
 
-      {/* Deudas pendientes */}
-      {deudas.filter(d => d.status === 'pending').map(deuda => (
-        <div className="tx-card deuda" key={deuda.id}>
-          <div className="tx-left">
-            <div className="tx-icon deuda">
-              <FaExclamation />
-            </div>
-            <div className="tx-info">
-              <span className="tx-type deuda">Deuda</span>
-              <span className="tx-desc">{deuda.reason} — {deuda.person}</span>
-            </div>
-          </div>
-
-          <div className="tx-center">
-            <span className="tx-date-centered">
-              {new Date(deuda.created_at).toLocaleDateString()}
-            </span>
-            <div className="account-name">Pendiente</div>
-            <div className="tx-amount deuda">- {formatoMoneda(deuda.total_amount)}</div>
-          </div>
-
-          <div className="tx-right">
-            <button className="tx-edit" onClick={() => marcarDeudaComoPagada(deuda)}>
-              <FaCheck /> Marcar como pagada
-            </button>
+    {/* Modal de edición */}
+    {editando && (
+      <div className="popup-overlay">
+        <div className="popup-content">
+          <h3>✏️ Editar Movimiento</h3>
+          <label>Descripción:</label>
+          <input
+            value={editDesc}
+            onChange={e => setEditDesc(e.target.value)}
+            placeholder="Descripción"
+          />
+          <label>Monto:</label>
+          <input
+            type="number"
+            value={editAmount}
+            onChange={e => setEditAmount(e.target.value)}
+            placeholder="Monto"
+          />
+          <div className="popup-buttons">
+            <button className="guardar" onClick={guardarCambios}>💾 Guardar</button>
+            <button className="cancelar" onClick={() => setEditando(null)}>Cancelar</button>
           </div>
         </div>
-      ))}
-
-      {/* Modal de edición */}
-      {editando && (
-        <div className="popup-overlay">
-          <div className="popup-content">
-            <h3>✏️ Editar Movimiento</h3>
-            <label>Descripción:</label>
-            <input
-              value={editDesc}
-              onChange={e => setEditDesc(e.target.value)}
-              placeholder="Descripción"
-            />
-            <label>Monto:</label>
-            <input
-              type="number"
-              value={editAmount}
-              onChange={e => setEditAmount(e.target.value)}
-              placeholder="Monto"
-            />
-            <div className="popup-buttons">
-              <button className="guardar" onClick={guardarCambios}>💾 Guardar</button>
-              <button className="cancelar" onClick={() => setEditando(null)}>Cancelar</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      </div>
+    )}
+  </div>
   )
 }

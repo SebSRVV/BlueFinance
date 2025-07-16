@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import {
   FaArrowDown, FaArrowUp, FaDollarSign, FaExclamation,
-  FaPiggyBank, FaLandmark, FaLeaf, FaMoneyBillAlt
+  FaPiggyBank, FaLandmark, FaLeaf, FaWallet
 } from 'react-icons/fa'
 import { motion } from 'framer-motion'
 import '@/app/styles/Overview.css'
@@ -51,7 +51,7 @@ export default function Overview() {
     bcp: 0,
     lemon: 0,
     interbank: 0,
-    cash: 0,
+    available: 0,
   })
 
   const normalize = (str: string) => str.toLowerCase().replace(/\s+/g, '')
@@ -70,7 +70,7 @@ export default function Overview() {
       const { data: debts } = await supabase.from('debts').select('*')
       const { data: people } = await supabase.from('people').select('*')
 
-      if (!transactions || !accounts) return
+      if (!transactions || !accounts || !debts) return
 
       const sumByType = (type: string) =>
         transactions.filter(t => t.type === type)
@@ -78,30 +78,22 @@ export default function Overview() {
 
       const income = sumByType('ingreso')
       const expense = sumByType('gasto')
-
-      const pendingDebts = (debts || []).filter(d => d.status === 'pending')
+      const pendingDebts = debts.filter(d => d.status === 'pending')
       const debt = pendingDebts.reduce((total, d) => total + Number(d.total_amount), 0)
-      const balance = income - expense - debt
+
+      const balance = income - expense - debt - 85
 
       const calcularBalanceCuenta = (cuentaId: string) => {
-        const deudaDeCuenta = (pendingDebts || [])
-          .filter(d => d.account_id === cuentaId)
+        const deudaDeCuenta = debts
+          .filter(d => d.account_id === cuentaId && d.status === 'pending')
           .reduce((total, d) => total + Number(d.total_amount), 0)
 
         return transactions.reduce((total, tx) => {
           const amount = Number(tx.amount)
 
-          if (tx.type === 'ingreso' && tx.account_id === cuentaId) {
-            return total + amount
-          }
-
-          if (tx.type !== 'ingreso' && tx.account_id === cuentaId) {
-            return total - amount
-          }
-
-          if (tx.type === 'movimiento' && tx.destination_account_id === cuentaId) {
-            return total + amount
-          }
+          if (tx.type === 'ingreso' && tx.account_id === cuentaId) return total + amount
+          if (tx.type !== 'ingreso' && tx.account_id === cuentaId) return total - amount
+          if (tx.type === 'movimiento' && tx.destination_account_id === cuentaId) return total + amount
 
           return total
         }, 0) - deudaDeCuenta
@@ -125,6 +117,8 @@ export default function Overview() {
 
       const totalWarda = calculatedWards.reduce((sum, w) => sum + w.balance, 0)
 
+      const available = balance - totalWarda
+
       const enrichedDebts = pendingDebts.map(d => {
         const person = people?.find(p => p.id === d.person_id)
         return {
@@ -133,7 +127,18 @@ export default function Overview() {
         }
       })
 
-      setStats({ income, expense, debt, balance, warda: totalWarda, bcp, lemon, interbank, cash })
+      setStats({
+        income,
+        expense,
+        debt,
+        balance,
+        warda: totalWarda,
+        bcp,
+        lemon,
+        interbank,
+        available
+      })
+
       setWards(calculatedWards)
       setDebtList(enrichedDebts)
     }
@@ -149,7 +154,7 @@ export default function Overview() {
     { title: 'BCP', value: stats.bcp, icon: <FaLandmark className="icon bcp" />, type: 'bcp' },
     { title: 'Lemon', value: stats.lemon, icon: <FaLeaf className="icon lemon" />, type: 'lemon' },
     { title: 'Interbank', value: stats.interbank, icon: <FaLandmark className="icon interbank" />, type: 'interbank' },
-    { title: 'Dinero', value: stats.cash, icon: <FaMoneyBillAlt className="icon cash" />, type: 'cash' },
+    { title: 'Balance Disponible', value: stats.available, icon: <FaWallet className="icon cash" />, type: 'available' },
     { title: 'Ahorro Warda', value: stats.warda, icon: <FaPiggyBank className="icon warda" />, type: 'warda' },
   ]
 
@@ -176,7 +181,6 @@ export default function Overview() {
             </div>
           </div>
 
-          {/* SOLO Warda tiene desglose */}
           {item.type === 'warda' && wards.length > 0 && (
             <motion.div
               className="warda-inline-list"

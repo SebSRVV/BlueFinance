@@ -66,6 +66,7 @@ export default function TransactionForm() {
           ...prev,
           tipo: value as TipoTransaccion,
           categoria: categoriaDefault,
+          descripcion: '',
           person: '',
           conciliado: false,
           cuenta_destino_id: '',
@@ -100,7 +101,8 @@ export default function TransactionForm() {
 
     if (isNaN(parsedAmount) || parsedAmount <= 0)
       return setMensaje('❌ El monto debe ser mayor a 0')
-    if (!descripcion.trim())
+
+    if (tipo !== 'movimiento' && !descripcion.trim())
       return setMensaje('❌ La descripción es obligatoria')
 
     const { data: userData } = await supabase.auth.getUser()
@@ -114,7 +116,6 @@ export default function TransactionForm() {
 
       let person_id: string
 
-      // Buscar si el contacto ya existe
       const { data: existingPerson, error: personError } = await supabase
         .from('people')
         .select('id')
@@ -127,7 +128,6 @@ export default function TransactionForm() {
       if (existingPerson) {
         person_id = existingPerson.id
       } else {
-        // Crear nuevo contacto si no existe
         const { data: newPerson, error: insertError } = await supabase
           .from('people')
           .insert({
@@ -147,6 +147,7 @@ export default function TransactionForm() {
         user_id,
         person_id,
         reason: descripcion,
+        category: categoria,
         total_amount: parsedAmount,
         status: 'pending',
         account_id: cuenta_id,
@@ -164,6 +165,7 @@ export default function TransactionForm() {
         id: uuidv4(),
         user_id,
         reason: descripcion,
+        category: categoria,
         total_amount: parsedAmount,
         status: 'pending',
         account_id: cuenta_id,
@@ -177,10 +179,16 @@ export default function TransactionForm() {
     } else {
       if (!cuenta_id) return setMensaje('❌ Selecciona la cuenta origen')
 
+      let finalDescripcion = descripcion
+
       if (tipo === 'movimiento') {
         if (!cuenta_destino_id) return setMensaje('❌ Selecciona la cuenta destino')
         if (cuenta_id === cuenta_destino_id)
           return setMensaje('❌ Cuenta origen y destino no pueden ser iguales')
+
+        const cuentaOrigen = cuentas.find(c => c.id === cuenta_id)?.name || 'Cuenta origen'
+        const cuentaDestino = cuentas.find(c => c.id === cuenta_destino_id)?.name || 'Cuenta destino'
+        finalDescripcion = `De ${cuentaOrigen} a ${cuentaDestino}`
       }
 
       const nuevaTransaccion = {
@@ -188,7 +196,7 @@ export default function TransactionForm() {
         user_id,
         type: tipo,
         amount: parsedAmount,
-        description: descripcion,
+        description: finalDescripcion,
         category: tipo === 'movimiento' ? null : categoria,
         account_id: cuenta_id,
         destination_account_id: tipo === 'movimiento' ? cuenta_destino_id : null,
@@ -218,12 +226,17 @@ export default function TransactionForm() {
     window.location.reload()
   }
 
-  // Control de visibilidad por tipo
   const mostrarCategoria = formulario.tipo === 'gasto'
   const mostrarConciliado = ['ingreso', 'gasto'].includes(formulario.tipo)
   const mostrarCuenta = ['ingreso', 'gasto', 'deuda', 'prestamo', 'movimiento'].includes(formulario.tipo)
   const mostrarCuentaDestino = formulario.tipo === 'movimiento'
   const mostrarPersona = formulario.tipo === 'deuda'
+
+  // Generar descripción dinámica en pantalla para movimientos
+  const descripcionAuto =
+    formulario.tipo === 'movimiento' && formulario.cuenta_id && formulario.cuenta_destino_id
+      ? `De ${cuentas.find(c => c.id === formulario.cuenta_id)?.name || ''} a ${cuentas.find(c => c.id === formulario.cuenta_destino_id)?.name || ''}`
+      : ''
 
   return (
     <form className="form-card" onSubmit={handleSubmit}>
@@ -241,8 +254,16 @@ export default function TransactionForm() {
       <label>Monto:</label>
       <input name="monto" type="number" value={formulario.monto} onChange={handleChange} />
 
-      <label>Descripción:</label>
-      <input name="descripcion" value={formulario.descripcion} onChange={handleChange} />
+      {formulario.tipo !== 'movimiento' ? (
+        <>
+          <label>Descripción:</label>
+          <input name="descripcion" value={formulario.descripcion} onChange={handleChange} />
+        </>
+      ) : (
+        descripcionAuto && (
+          <p className="descripcion-preview">📝 Descripción: <strong>{descripcionAuto}</strong></p>
+        )
+      )}
 
       {mostrarPersona && (
         <>

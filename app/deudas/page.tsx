@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import html2canvas from 'html2canvas'
 import dayjs from 'dayjs'
 import {
-  FaUser, FaMoneyBillWave, FaCalendarAlt, FaCheckCircle, FaHourglassHalf
+  FaUser, FaMoneyBillWave, FaCalendarAlt, FaCheckCircle
 } from 'react-icons/fa'
 import { supabase } from '@/lib/supabase'
 import './deudas.css'
@@ -25,6 +25,9 @@ export default function ReporteDeudasPage() {
   const [filtro, setFiltro] = useState('')
   const [loading, setLoading] = useState(true)
   const [seleccionadas, setSeleccionadas] = useState<Set<string>>(new Set())
+  const [modalAbierto, setModalAbierto] = useState(false)
+  const [deudaSeleccionada, setDeudaSeleccionada] = useState<Deuda | null>(null)
+  const [montoParcial, setMontoParcial] = useState('')
   const reporteRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -156,13 +159,71 @@ export default function ReporteDeudasPage() {
     }
   }
 
+  const abrirModalParcial = (deuda: Deuda) => {
+    setDeudaSeleccionada(deuda)
+    setMontoParcial('')
+    setModalAbierto(true)
+  }
+
+  const pagarParcialmente = async () => {
+    if (!deudaSeleccionada) return
+
+    const monto = parseFloat(montoParcial)
+    if (isNaN(monto) || monto <= 0 || monto > deudaSeleccionada.total_amount) {
+      alert('❌ Monto inválido')
+      return
+    }
+
+    const { data: sessionData } = await supabase.auth.getUser()
+    const user_id = sessionData?.user?.id
+    if (!user_id) return
+
+    const { error: transError } = await supabase.from('transactions').insert({
+      user_id,
+      type: 'ingreso',
+      amount: monto,
+      description: `Pago parcial deuda: ${deudaSeleccionada.reason}`,
+      category: 'Reembolso',
+      created_at: new Date().toISOString(),
+      account_id: null,
+      destination_account_id: null,
+      is_reconciled: false
+    })
+
+    const nuevoMonto = deudaSeleccionada.total_amount - monto
+    const statusFinal = nuevoMonto <= 0.01 ? 'paid' : 'pending'
+
+    const { error: updateError } = await supabase
+      .from('debts')
+      .update({
+        total_amount: nuevoMonto,
+        status: statusFinal
+      })
+      .eq('id', deudaSeleccionada.id)
+
+    if (!transError && !updateError) {
+      setDeudas(prev =>
+        prev.map(d =>
+          d.id === deudaSeleccionada.id
+            ? { ...d, total_amount: nuevoMonto, status: statusFinal }
+            : d
+        )
+      )
+      setModalAbierto(false)
+      setDeudaSeleccionada(null)
+    } else {
+      alert('❌ Error al aplicar pago parcial')
+    }
+  }
+
   return (
     <main className="deudas-page">
-      <button className="return-button" onClick={() => router.push('/dashboard')}>
-        ⬅ Volver al Dashboard
-      </button>
-
-      <h1 className="dashboard-title">🧾 Reporte de Deudas</h1>
+      <div className="top-bar">
+        <button className="return-button" onClick={() => router.push('/dashboard')}>
+          ⬅ Volver al Dashboard
+        </button>
+        <h1 className="dashboard-title">🧾 Reporte de Deudas</h1>
+      </div>
 
       <div className="form-card">
         <label>Filtrar por persona o motivo:</label>
@@ -196,43 +257,35 @@ export default function ReporteDeudasPage() {
                   </label>
                 </div>
 
-                <ul>
+                <div className="deudas-grid">
                   {deudas.map(d => (
-                    <li key={d.id}>
-                      <div className="deuda-row">
-                        <div className="deuda-info">
+                    <div key={d.id} className="deuda-card">
+                      <div className="deuda-main">
+                        <div className="deuda-header">
                           <strong>{d.reason || 'Sin motivo'}</strong>
-                          <span>
-                            <FaMoneyBillWave /> <b>S/{d.total_amount.toFixed(2)}</b>
-                            <span className={`badge ${d.status === 'pending' ? 'badge-pending' : 'badge-paid'}`}>
-                              {d.status === 'pending' ? (
-                                <>
-                                  <FaHourglassHalf /> Pendiente
-                                </>
-                              ) : (
-                                <>
-                                  <FaCheckCircle /> Pagada
-                                </>
-                              )}
-                            </span>
-                          </span>
-                          <span className="fecha">
-                            <FaCalendarAlt /> {formatearFecha(d.created_at)}
+                          <span className={`badge ${d.status === 'pending' ? 'badge-pending' : 'badge-paid'}`}>
+                            {d.status === 'pending' ? 'Pendiente' : <><FaCheckCircle /> Pagada</>}
                           </span>
                         </div>
-
-                        {d.status === 'pending' && (
-                          <button
-                            className="marcar-pagada-link"
-                            onClick={() => marcarUnaComoPagada(d)}
-                          >
-                            Marcar como pagada
-                          </button>
-                        )}
+                        <div className="deuda-detalles">
+                          <span><FaMoneyBillWave /> S/{d.total_amount.toFixed(2)}</span>
+                          <span><FaCalendarAlt /> {formatearFecha(d.created_at)}</span>
+                        </div>
                       </div>
-                    </li>
+
+                      {d.status === 'pending' && (
+                        <div className="deuda-acciones">
+                          <button className="marcar-pagada-link" onClick={() => marcarUnaComoPagada(d)}>
+                            Pagada total
+                          </button>
+                          <button className="marcar-pagada-link" onClick={() => abrirModalParcial(d)}>
+                            Parcial
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   ))}
-                </ul>
+                </div>
 
                 <p className="subtotal">Subtotal: S/{subtotal.toFixed(2)}</p>
               </div>
@@ -241,15 +294,37 @@ export default function ReporteDeudasPage() {
         )}
       </div>
 
-      {seleccionadas.size > 0 && (
-        <button className="export-button" onClick={descargarImagen}>
-          📥 Descargar seleccionadas
-        </button>
-      )}
+      <div className="acciones-finales">
+        {seleccionadas.size > 0 && (
+          <button className="export-button" onClick={descargarImagen}>
+            📥 Descargar seleccionadas
+          </button>
+        )}
 
-      {deudasFiltradas.length > 0 && (
-        <div className="reporte-total">
-          <h2>Total global: S/{totalGlobal.toFixed(2)}</h2>
+        {deudasFiltradas.length > 0 && (
+          <div className="reporte-total">
+            <h2>Total global: S/{totalGlobal.toFixed(2)}</h2>
+          </div>
+        )}
+      </div>
+
+      {modalAbierto && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Pago parcial</h3>
+            <p>Motivo: <strong>{deudaSeleccionada?.reason}</strong></p>
+            <p>Monto actual: <strong>S/{deudaSeleccionada?.total_amount.toFixed(2)}</strong></p>
+            <input
+              type="number"
+              placeholder="Monto a pagar"
+              value={montoParcial}
+              onChange={(e) => setMontoParcial(e.target.value)}
+            />
+            <div className="modal-buttons">
+              <button onClick={pagarParcialmente}>Confirmar</button>
+              <button onClick={() => setModalAbierto(false)}>Cancelar</button>
+            </div>
+          </div>
         </div>
       )}
     </main>
