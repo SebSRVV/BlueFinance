@@ -1,17 +1,4 @@
-:root {
-  --blue-dark: #001f3f;
-  --blue-main: #004080;
-  --blue-mid: #0066cc;
-  --blue-light: #b3d9ff;
-  --teal: #0097a7;
-  --teal-dark: #006064;
-  --white: #ffffff;
-}
 
-body {
-  margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
 
 .main-page {
   display: flex;
