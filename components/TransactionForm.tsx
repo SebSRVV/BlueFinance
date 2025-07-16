@@ -147,7 +147,6 @@ export default function TransactionForm() {
         user_id,
         person_id,
         reason: descripcion,
-        category: categoria,
         total_amount: parsedAmount,
         status: 'pending',
         account_id: cuenta_id,
