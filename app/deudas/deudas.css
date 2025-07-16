@@ -10,372 +10,7 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* === Botones === */
-.return-button,
-.export-button {
-  background-color: #3b82f6;
-  color: #f1f5f9;
-  padding: 0.6rem 1.2rem;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  max-width: fit-content;
-}
-
-.return-button:hover,
-.export-button:hover {
-  background-color: #2563eb;
-  transform: scale(1.05);
-}
-
-/* === Filtro === */
-.form-card {
-  background-color: #1e293b;
-  padding: 1rem;
-  border-radius: 10px;
-  border: 1px solid #334155;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.form-card label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #cbd5e1;
-  font-weight: 500;
-}
-
-.form-card input {
-  width: 100%;
-  background-color: #1e293b;
-  border: 1px solid #475569;
-  color: #f1f5f9;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  font-size: 1rem;
-  transition: border-color 0.2s ease;
-}
-
-.form-card input:focus {
-  border-color: #3b82f6;
-  outline: none;
-}
-
-.form-card input::placeholder {
-  color: #94a3b8;
-}
-
-/* === Contenedor del reporte === */
-.reporte-preview {
-  background-color: #1e293b;
-  padding: 1rem;
-  border-radius: 10px;
-  border: 1px solid #334155;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
-}
-
-/* === Agrupación por persona === */
-.grupo-deuda {
-  background-color: #0f172a;
-  padding: 1rem 1.25rem;
-  border-radius: 12px;
-  border: 1px solid #334155;
-  margin-bottom: 1.5rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: inset 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-.grupo-deuda:hover {
-  transform: scale(1.01);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-.grupo-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.persona-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #f1f5f9;
-}
-
-.persona-checkbox input[type='checkbox'] {
-  width: 1rem;
-  height: 1rem;
-  accent-color: #3b82f6;
-}
-
-/* === Rejilla de deudas === */
-.deudas-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-/* === Tarjeta de deuda === */
-.deuda-card {
-  background-color: #1e293b;
-  border: 1px solid #334155;
-  border-left: 4px solid #3b82f6;
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-}
-
-.deuda-card:hover {
-  transform: translateY(-4px);
-  background-color: #243447;
-}
-
-.deuda-main {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.deuda-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-  font-size: 1rem;
-  color: #f1f5f9;
-}
-
-.deuda-detalles {
-  font-size: 0.9rem;
-  color: #cbd5e1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-/* === Botones de acción en tarjetas === */
-.deuda-acciones {
-  margin-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  align-items: flex-end;
-}
-
-.deuda-acciones button {
-  background-color: #334155;
-  border: 1px solid #3b82f6;
-  color: #f1f5f9;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.deuda-acciones button:hover {
-  background-color: #3b82f6;
-  color: #fff;
-}
-
-/* === Estado (Badges) === */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.7rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border-radius: 9999px;
-  border: 1px solid transparent;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-}
-
-.badge-pending {
-  background-color: #ffe066;
-  color: #000000;
-  border: 1px solid #facc15;
-}
-
-.badge-paid {
-  background-color: #10b981;
-  color: #ffffff;
-  border: 1px solid #059669;
-}
-
-/* === Subtotal por persona === */
-.subtotal {
-  font-weight: 600;
-  color: #facc15;
-  text-align: right;
-  margin-top: 1rem;
-}
-
-/* === Total global === */
-.reporte-total {
-  border-top: 1px solid #334155;
-  margin-top: 2rem;
-  padding-top: 1rem;
-  text-align: right;
-}
-
-.reporte-total h2 {
-  font-weight: 800;
-  font-size: 1.4rem;
-  color: #facc15;
-}
-
-/* === Modal === */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(15, 23, 42, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal {
-  background-color: #1e293b;
-  padding: 2rem;
-  border-radius: 12px;
-  max-width: 400px;
-  width: 100%;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-  color: #f1f5f9;
-}
-
-.modal h3 {
-  font-size: 1.3rem;
-  margin-bottom: 1rem;
-  color: #facc15;
-}
-
-.modal h4 {
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-  color: #f8fafc;
-}
-
-.modal input {
-  width: 100%;
-  padding: 0.7rem;
-  border-radius: 8px;
-  border: 1px solid #475569;
-  background-color: #0f172a;
-  color: #f1f5f9;
-  font-size: 1rem;
-  margin: 1rem 0;
-}
-
-.modal-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-}
-
-.modal-buttons button {
-  background-color: #3b82f6;
-  color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.modal-buttons button:hover {
-  background-color: #2563eb;
-}
-
-/* === Historial de pagos === */
-.historial {
-  background-color: #0f172a;
-  padding: 0.75rem 1rem;
-  margin-top: 0.75rem;
-  border-left: 4px solid #3b82f6;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  color: #f1f5f9;
-}
-
-.historial-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.historial ul {
-  padding-left: 1rem;
-  list-style-type: disc;
-}
-
-.historial li {
-  margin-bottom: 0.25rem;
-}
-
-/* === Sección de pagadas === */
-.seccion-pagadas {
-  margin-top: 2rem;
-  border-top: 2px solid #334155;
-  padding-top: 1rem;
-}
-
-.seccion-pagadas h2 {
-  margin-bottom: 1rem;
-  color: #22c55e;
-}
-
-.grupo-deuda.pagadas .badge-paid {
-  background-color: #22c55e;
-  color: #fff;
-}
-
-/* === Responsive === */
-@media (max-width: 600px) {
-  .deuda-acciones {
-    flex-direction: row;
-    justify-content: flex-start;
-    width: 100%;
-    margin-top: 1rem;
-  }
-
-  .return-button,
-  .export-button {
-    width: 100%;
-    text-align: center;
-  }
-
-  .grupo-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-}
-
-.deuda-detalles span {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #cbd5e1;
-  font-size: 0.9rem;
-}
-
+/* === Top Bar === */
 .top-bar {
   display: flex;
   flex-direction: column;
@@ -418,4 +53,335 @@
   color: #facc15;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   margin: 0;
+}
+
+/* === Botón Exportar === */
+.export-button {
+  background-color: #3b82f6;
+  color: #f1f5f9;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.export-button:hover {
+  background-color: #2563eb;
+  transform: scale(1.05);
+}
+
+/* === Filtro === */
+.form-card {
+  background-color: #1e293b;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid #334155;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.form-card label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.form-card input {
+  width: 100%;
+  background-color: #1e293b;
+  border: 1px solid #475569;
+  color: #f1f5f9;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.form-card input:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+.form-card input::placeholder {
+  color: #94a3b8;
+}
+
+/* === Contenedor de Reporte === */
+.reporte-preview {
+  background-color: #1e293b;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid #334155;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* === Grupo de Deuda === */
+.grupo-deuda {
+  background-color: #0f172a;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  margin-bottom: 1.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: inset 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.grupo-deuda:hover {
+  transform: scale(1.01);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.grupo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.persona-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.persona-checkbox input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #3b82f6;
+}
+
+/* === Rejilla de tarjetas === */
+.deudas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+/* === Tarjeta individual === */
+.deuda-card {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-left: 4px solid #3b82f6;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.deuda-card:hover {
+  transform: translateY(-4px);
+  background-color: #243447;
+}
+
+.deuda-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.deuda-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #f1f5f9;
+}
+
+.deuda-detalles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.deuda-detalles span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
+/* === Botones en tarjeta === */
+.deuda-acciones {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: flex-end;
+}
+
+.deuda-acciones button {
+  background-color: #334155;
+  border: 1px solid #3b82f6;
+  color: #f1f5f9;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.deuda-acciones button:hover {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+/* === Badges de estado === */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.badge-pending {
+  background-color: #ffe066;
+  color: #000;
+  border: 1px solid #facc15;
+}
+
+.badge-paid {
+  background-color: #10b981;
+  color: #fff;
+  border: 1px solid #059669;
+}
+
+/* === Subtotales y Totales === */
+.subtotal {
+  font-weight: 600;
+  color: #facc15;
+  text-align: right;
+  margin-top: 1rem;
+}
+
+.reporte-total {
+  border-top: 1px solid #334155;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  text-align: right;
+}
+
+.reporte-total h2 {
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: #facc15;
+}
+
+/* === Pagadas === */
+.seccion-pagadas {
+  margin-top: 2rem;
+  border-top: 2px solid #334155;
+  padding-top: 1rem;
+}
+
+.seccion-pagadas h2 {
+  margin-bottom: 1rem;
+  color: #22c55e;
+}
+
+.grupo-deuda.pagadas .badge-paid {
+  background-color: #22c55e;
+  color: #fff;
+}
+
+/* === Modal === */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(15, 23, 42, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: #1e293b;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  color: #f1f5f9;
+}
+
+.modal h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: #facc15;
+}
+
+.modal input {
+  width: 100%;
+  padding: 0.7rem;
+  border-radius: 8px;
+  border: 1px solid #475569;
+  background-color: #0f172a;
+  color: #f1f5f9;
+  font-size: 1rem;
+  margin: 1rem 0;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.modal-buttons button {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.modal-buttons button:hover {
+  background-color: #2563eb;
+}
+
+/* === Responsive === */
+@media (max-width: 600px) {
+  .deuda-acciones {
+    flex-direction: row;
+    justify-content: flex-start;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .export-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .grupo-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+.titulo-deudas.centrado {
+  flex: 1;
+  text-align: center;
 }

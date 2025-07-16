@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import html2canvas from 'html2canvas'
 import dayjs from 'dayjs'
 import {
   FaUser, FaMoneyBillWave, FaCalendarAlt, FaCheckCircle
@@ -117,26 +116,34 @@ export default function ReporteDeudasPage() {
       return nueva
     })
 
-  const descargarImagen = async () => {
-    if (!reporteRef.current) return
-    const grupos = Array.from(reporteRef.current.querySelectorAll<HTMLElement>('[data-persona]'))
-    const ocultos: HTMLElement[] = []
+  const exportarDatos = () => {
+    if (seleccionadas.size === 0) {
+      alert('Selecciona al menos una persona.')
+      return
+    }
 
-    grupos.forEach(grupo => {
-      const nombre = grupo.getAttribute('data-persona')
-      if (!nombre || !seleccionadas.has(nombre)) {
-        ocultos.push(grupo)
-        grupo.style.display = 'none'
-      }
+    let contenido = `📄 Reporte de Deudas\n\n`
+
+    seleccionadas.forEach(nombre => {
+      const personaDeudas = deudas.filter(d => d.people.name === nombre && d.status === 'pending')
+      if (personaDeudas.length === 0) return
+
+      let subtotal = 0
+      contenido += `👤 ${nombre}\n`
+
+      personaDeudas.forEach(d => {
+        subtotal += d.total_amount
+        contenido += `- ${d.reason} | ${formatearFecha(d.created_at)} | Pendiente: S/${d.total_amount.toFixed(2)}\n`
+      })
+
+      contenido += `Total pendiente de ${nombre}: S/${subtotal.toFixed(2)}\n\n`
     })
 
-    const canvas = await html2canvas(reporteRef.current)
+    const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' })
     const link = document.createElement('a')
-    link.download = 'deudas.png'
-    link.href = canvas.toDataURL('image/png')
+    link.href = URL.createObjectURL(blob)
+    link.download = 'reporte_deudas.txt'
     link.click()
-
-    ocultos.forEach(el => (el.style.display = ''))
   }
 
   const marcarPagada = async (deuda: Deuda, parcial = false) => {
@@ -201,15 +208,41 @@ export default function ReporteDeudasPage() {
     setMontoParcial('')
   }
 
+  const eliminarDeuda = async (deudaId: string) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar esta deuda? Esta acción no se puede deshacer.')) return
+
+    const { data: sessionData } = await supabase.auth.getUser()
+    const user_id = sessionData?.user?.id
+    if (!user_id) return
+
+    const { error: errorPagos } = await supabase
+      .from('debt_payments')
+      .delete()
+      .eq('debt_id', deudaId)
+      .eq('user_id', user_id)
+
+    const { error: errorDeuda } = await supabase
+      .from('debts')
+      .delete()
+      .eq('id', deudaId)
+      .eq('user_id', user_id)
+
+    if (errorPagos || errorDeuda) {
+      alert('❌ Error al eliminar la deuda.')
+      return
+    }
+
+    setDeudas(prev => prev.filter(d => d.id !== deudaId))
+  }
+
   return (
     <main className="deudas-page">
-  <div className="top-bar">
-  <button className="volver-btn" onClick={() => router.push('/dashboard')}>
-    ⬅ Volver al Dashboard
-  </button>
-  <h1 className="titulo-deudas">🧾 Reporte de Deudas</h1>
-</div>
-
+      <div className="top-bar">
+        <button className="volver-btn" onClick={() => router.push('/dashboard')}>
+          ⬅ Volver al Dashboard
+        </button>
+        <h1 className="titulo-deudas centrado">🧾 Reporte de Deudas</h1>
+      </div>
 
       <div className="form-card">
         <label>Filtrar:</label>
@@ -258,6 +291,7 @@ export default function ReporteDeudasPage() {
                         <div className="deuda-acciones">
                           <button onClick={() => marcarPagada(deuda, false)}>Pago Completo</button>
                           <button onClick={() => setPagarModal(deuda)}>Pago Parcial</button>
+                          <button onClick={() => eliminarDeuda(deuda.id)} className="eliminar-btn">🗑 Eliminar</button>
                         </div>
                       </div>
                     ))}
@@ -306,7 +340,11 @@ export default function ReporteDeudasPage() {
       </div>
 
       <div className="acciones-finales">
-        {seleccionadas.size > 0 && <button onClick={descargarImagen}>📥 Exportar</button>}
+        {seleccionadas.size > 0 && (
+          <button onClick={exportarDatos} className="export-button">
+            📥 Exportar
+          </button>
+        )}
         {pendientes.length > 0 && (
           <div className="reporte-total">
             <h2>Total pendiente: S/{totalGlobal.toFixed(2)}</h2>

@@ -51,40 +51,48 @@ export default function WardaPage() {
   }, [])
 
   const fetchBCP = async (uid: string) => {
-    const { data, error } = await supabase
-      .from('accounts')
-      .select('id')
-      .eq('user_id', uid)
-      .eq('name', 'BCP')
-      .single()
+  const { data, error } = await supabase
+    .from('accounts')
+    .select('id')
+    .eq('user_id', uid)
+    .eq('name', 'BCP')
+    .single()
 
-    if (error || !data) return
-    setBcpAccountId(data.id)
+  if (error || !data) return
+  setBcpAccountId(data.id)
 
-    const { data: transacciones } = await supabase
-      .from('transactions')
-      .select('amount, type, account_id, destination_account_id')
-      .eq('user_id', uid)
+  const { data: transacciones } = await supabase
+    .from('transactions')
+    .select('amount, type, account_id, destination_account_id')
+    .eq('user_id', uid)
 
-    const balance = (transacciones || []).reduce((acc, tx) => {
-      const isBCP =
-        tx.account_id === data.id || tx.destination_account_id === data.id
+  const { data: deudas } = await supabase
+    .from('debts')
+    .select('total_amount, status, account_id')
+    .eq('user_id', uid)
 
-      if (!isBCP) return acc
+  const deudaPendienteBCP = (deudas || [])
+    .filter(d => d.status === 'pending' && d.account_id === data.id)
+    .reduce((total, d) => total + Number(d.total_amount), 0)
 
-      const isIngreso = tx.type === 'ingreso' && tx.account_id === data.id
-      const isGasto = tx.type === 'gasto' && tx.account_id === data.id
-      const isMovimientoSalida = tx.type === 'movimiento' && tx.account_id === data.id
-      const isMovimientoEntrada = tx.type === 'movimiento' && tx.destination_account_id === data.id
+  const balance = (transacciones || []).reduce((acc, tx) => {
+    const isBCP = tx.account_id === data.id || tx.destination_account_id === data.id
+    if (!isBCP) return acc
 
-      if (isIngreso || isMovimientoEntrada) return acc + Number(tx.amount)
-      if (isGasto || isMovimientoSalida) return acc - Number(tx.amount)
+    const isIngreso = tx.type === 'ingreso' && tx.account_id === data.id
+    const isGasto = tx.type === 'gasto' && tx.account_id === data.id
+    const isMovimientoSalida = tx.type === 'movimiento' && tx.account_id === data.id
+    const isMovimientoEntrada = tx.type === 'movimiento' && tx.destination_account_id === data.id
 
-      return acc
-    }, 0)
+    if (isIngreso || isMovimientoEntrada) return acc + Number(tx.amount)
+    if (isGasto || isMovimientoSalida) return acc - Number(tx.amount)
 
-    setBcpBalance(balance)
-  }
+    return acc
+  }, 0)
+
+  // Resta las deudas pendientes asociadas a la cuenta BCP
+  setBcpBalance(balance - deudaPendienteBCP)
+}
 
   const fetchWards = async (uid: string) => {
     const { data: wardsData } = await supabase
